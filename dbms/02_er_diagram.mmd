@@ -1,0 +1,76 @@
+%% ============================================================================
+%% CollegeXchange: Campus Student Marketplace (AP 2026 / DBMS Capstone)
+%% Entity-Relationship (ER) Diagram
+%% File: dbms/02_er_diagram.mmd
+%% Format: Mermaid.js erDiagram
+%% Corresponds 1-to-1 with: dbms/03_schema.sql & prisma/schema.prisma
+%% ============================================================================
+
+erDiagram
+    User ||--o{ Listing : "posts"
+    User ||--o{ Favorite : "saves"
+    User ||--o{ Message : "sends"
+    User ||--o{ Message : "receives"
+    Category ||--o{ Listing : "classifies"
+    Listing ||--o{ ListingImage : "has"
+    Listing ||--o{ Favorite : "bookmarked_in"
+    Listing ||--o{ Message : "discusses"
+
+    User {
+        varchar id PK "Unique student/user identifier (UUID/CUID)"
+        varchar name "Full student/user name"
+        varchar email UK "College email address (Unique candidate key)"
+        varchar role "User role ('STUDENT' or 'ADMIN')"
+        varchar department "Academic department (e.g. CSE, ECE, Mech)"
+        varchar year "Academic year (e.g. 1st Year, 2nd Year, 3rd Year)"
+        varchar hostel "Campus hostel residence / Day Scholar"
+        varchar phone "Contact telephone number"
+        timestamp created_at "Account creation timestamp"
+    }
+
+    Category {
+        varchar id PK "Unique category identifier"
+        varchar name UK "Category display name (Unique)"
+        varchar slug UK "URL-friendly slug (Unique)"
+        text description "Category scope description"
+        timestamp created_at "Taxonomy creation timestamp"
+    }
+
+    Listing {
+        varchar id PK "Unique listing identifier"
+        varchar seller_id FK "References User(id)"
+        varchar category_id FK "References Category(id)"
+        varchar title "Product listing title"
+        text description "Detailed product description"
+        decimal price "Item purchase price in INR (>= 0)"
+        decimal rent_price "Rental price per semester in INR (>= 0)"
+        varchar listing_type "Transaction type ('BUY', 'RENT', 'BOTH')"
+        varchar condition "Physical condition ('NEW', 'LIKE_NEW', 'GOOD', 'FAIR', 'POOR')"
+        varchar location "Campus pickup location (e.g. Library, Hostel A)"
+        varchar status "Lifecycle status ('ACTIVE', 'SOLD', 'DELETED')"
+        timestamp created_at "Listing post timestamp"
+        timestamp updated_at "Last update timestamp"
+    }
+
+    ListingImage {
+        varchar id PK "Unique image attachment identifier"
+        varchar listing_id FK "References Listing(id)"
+        varchar image_path "Relative static path to image asset"
+        timestamp created_at "Image upload timestamp"
+    }
+
+    Favorite {
+        varchar id PK "Unique bookmark record identifier"
+        varchar student_id FK "References User(id)"
+        varchar listing_id FK "References Listing(id)"
+        timestamp created_at "Saved to wishlist timestamp"
+    }
+
+    Message {
+        varchar id PK "Unique chat message identifier"
+        varchar listing_id FK "References Listing(id)"
+        varchar sender_id FK "References User(id) - Sender"
+        varchar receiver_id FK "References User(id) - Receiver"
+        text content "Direct chat message content"
+        timestamp created_at "Message sent timestamp"
+    }
