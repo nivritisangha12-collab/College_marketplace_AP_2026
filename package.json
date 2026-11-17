@@ -1,0 +1,33 @@
+{
+  "name": "collegexchange",
+  "version": "1.0.0",
+  "description": "College-exclusive marketplace capstone project strictly implementing AP Node.js & Express syllabus",
+  "main": "backend/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "http-demo": "node backend/httpDemo.js",
+    "seed": "node scripts/seed.js",
+    "cli": "node scripts/cli.js",
+    "prisma:migrate": "npx prisma migrate dev"
+  },
+  "keywords": [
+    "collegexchange",
+    "ap-capstone",
+    "nodejs",
+    "express",
+    "rest",
+    "mvc",
+    "prisma-model"
+  ],
+  "author": "AP Student",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0"
+  }
+}
