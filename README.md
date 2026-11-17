@@ -1,115 +1,96 @@
-# College Marketplace
+# CollegeXchange — AP Capstone Project
 
-## Project Overview
+**CollegeXchange** is a college-exclusive student marketplace web application designed for students to buy, sell, and exchange textbooks, calculators, lab gear, cycles, and hostel items within their campus community.
 
-College Marketplace is a web-based platform designed exclusively for college students to buy and sell second-hand products within their campus community.
+This application is built strictly within the bounds of the **Advanced Programming (AP)** syllabus.
 
-The platform provides a centralized space where students can list unused items, discover affordable products, and connect with other students. It aims to make campus-based buying and selling more organized, convenient, and accessible.
+---
 
-## Problem Statement
+## Development Team & GitHub Contributors
 
-Students frequently face difficulties when buying or selling second-hand products within their college. Existing communication channels, such as WhatsApp groups and Instagram, often lack proper categorization, search functionality, and organized product listings.
+| Member | GitHub Username | Role & Key Contributions |
+|---|---|---|
+| **Mukund Mittal** | [`mukksshm`](https://github.com/mukksshm) | Backend Core, Server & Auth, Frontend Marketplace Client & Dynamic Flows |
+| **Nivriti Sangha** | [`nivritisangha12-collab`](https://github.com/nivritisangha12-collab) | Repository Lead, Project Scaffolding, Base Config & Master Documentation |
+| **Sairam** | [`Sairam789123`](https://github.com/Sairam789123) | Frontend UI Layout, Navigation, Shared Components, CLI Utility & Architecture Docs |
+| **Ankur Agarwal** | [`agarwalankur1605`](https://github.com/agarwalankur1605) | Database Schema (Prisma/SQL), Relational Normalization, Core REST APIs & Data Layer |
 
-College Marketplace addresses this problem by providing a dedicated online marketplace for students.
+---
 
-## Objectives
+## Key Features
 
-- Create a student-friendly buying and selling platform.
-- Provide secure user registration and authentication.
-- Allow students to upload and manage product listings.
-- Enable product searching and category-based filtering.
-- Facilitate communication between buyers and sellers.
-- Maintain organized product and user information.
+### Student Capabilities
+- **Marketplace Browsing & Discovery:** Search, filter by category/condition, and sort by price or date.
+- **Progressive 4-Step Listing Creation:** Form for listing items (`01` Category, `02` Info, `03` Price & Location, `04` Review).
+- **Product Details:** Two-column product detail modal with image, seller info, campus pickup location, and instant save action.
+- **Student Dashboard:** Manage active/sold listings, view saved favorites, and check marketplace inbox messages.
+- **Marketplace Messaging:** Standard HTTP REST messaging between buyers and sellers.
 
-## Technology Stack
+---
 
-**Frontend**
-- React.js
-- JavaScript
-- HTML
-- CSS
+## AP Syllabus Coverage & Mapping
 
-**Backend**
-- Node.js
-- Express.js
+| AP Syllabus Topic | Code Location | Demonstration Method |
+|---|---|---|
+| **JavaScript** | `public/app.js`, `backend/*` | ES6+, Promises, DOM API, `async/await` |
+| **Intro to Backend & Node.js** | `backend/server.js` | Express server initialization & listening |
+| **Module System** | `backend/` | `require()` & `module.exports` modularity |
+| **Process Module (`process.argv`)** | `scripts/seed.js` | CLI argument parsing (`node scripts/seed.js categories`) |
+| **Path Module (`path.join`)** | `backend/config/database.js` | Cross-platform absolute path resolution |
+| **Event Module (`event.emit`/`event.on`)** | `backend/events/listingEvents.js` | Activity logging triggered by domain events |
+| **Readline Module (`readline.question`)** | `scripts/cli.js` | Interactive terminal CLI interface |
+| **FS Module (Read/Write/Append)** | `backend/utils/fileUtils.js` | JSON data store management & `logs/activity.log` |
+| **HTTP Module (Request/Response)** | `backend/httpDemo.js` | Low-level Node HTTP server demonstration |
+| **Express Routing & REST** | `backend/routes/*.js` | Standard HTTP verbs (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`) |
+| **Express Middleware** | `backend/middleware/*.js` | Request logging, body validation, error handling |
+| **Express Router** | `backend/routes/` | Entity route grouping mounted via `app.use()` |
+| **Express Static File Serving** | `backend/server.js` | Serving HTML/CSS/JS frontend from `public/` |
+| **MVC Architecture** | `backend/` | Model (JSON/Prisma), View (Vanilla Web UI), Controller, Service |
+| **Prisma Model & Prisma Migrate** | `prisma/schema.prisma` | Relational schema definitions & SQL migration generation |
 
-**Database**
-- MySQL
+---
 
-**Authentication and Security**
-- JWT
-- bcrypt
+## Quickstart Instructions
 
-**Development Tools**
-- Postman
-- Git
-- GitHub
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-## Core Features
+### 2. Run Application (Express Server + Web UI)
+```bash
+npm start
+# OR
+npm run dev
+```
+Open **`http://localhost:5001`** in your browser.
 
-1. User Registration and Login
-2. Product Listing with Images
-3. Product Search and Filtering
-4. Product Details
-5. Seller Contact
-6. Mark Products as Sold
-7. Favourite Products
-8. Buyer-Seller Messaging
-9. Admin Management
+### 3. Standalone HTTP Demo Server
+```bash
+npm run http-demo
+```
+Server runs on `http://localhost:5002/demo`.
 
-## Application Workflow
+### 4. Seeder & CLI Utilities
+```bash
+# Process Module Seeder
+node scripts/seed.js all
 
-1. Student registers or logs into the platform.
-2. Student browses available products.
-3. Student searches or filters products by category.
-4. Student views product details and seller information.
-5. Buyer contacts the seller.
-6. Seller can manage the listing and mark the product as sold.
+# Readline CLI Utility
+node scripts/cli.js
 
-## Database Design
+# Prisma Migrate
+npx prisma migrate dev --name init
+```
 
-The application uses MySQL for structured data storage.
+---
 
-Core tables:
-
-- Users
-- Categories
-- Listings
-- Favorites
-- Messages
-
-## Advanced Programming Concepts
-
-The project demonstrates the practical application of:
-
-- Node.js runtime environment
-- Node.js Module System
-- Event Loop and asynchronous execution
-- Event Emitter
-- HTTP Server
-- Express.js framework
-- Express Routing
-- Middleware
-- REST API development
-- Request and Response Handling
-- Error Handling
-
-## API Testing
-
-Postman is used to test backend API endpoints and verify request-response behaviour.
-
-## Version Control
-
-Git and GitHub are used for source code management, collaboration, and tracking project development.
-
-## Future Scope
-
-- Online payment integration
-- Real-time chat functionality
-- Student email verification
-- Product rating and review system
-- Improved recommendation and filtering system
-
-## Conclusion
-
-College Marketplace aims to simplify campus-based buying and selling by providing students with a dedicated, organized, and user-friendly digital marketplace. The project combines frontend development, backend programming, database management, and API integration to demonstrate practical software development skills.
+## Documentation Links
+- [docs/syllabus-audit.md](file:///Users/Mukksss/College-marketplace/docs/syllabus-audit.md)
+- [docs/architecture.md](file:///Users/Mukksss/College-marketplace/docs/architecture.md)
+- [docs/ap-topics.md](file:///Users/Mukksss/College-marketplace/docs/ap-topics.md)
+- [docs/api.md](file:///Users/Mukksss/College-marketplace/docs/api.md)
+- [docs/setup.md](file:///Users/Mukksss/College-marketplace/docs/setup.md)
+- [docs/testing.md](file:///Users/Mukksss/College-marketplace/docs/testing.md)
+- [docs/viva-notes.md](file:///Users/Mukksss/College-marketplace/docs/viva-notes.md)
+- [dbms/01_normalization.md](file:///Users/Mukksss/College-marketplace/dbms/01_normalization.md)
