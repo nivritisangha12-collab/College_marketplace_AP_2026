@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CollegeXchange — Student Marketplace</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="navbar-inner">
+        <div class="brand-logo" id="navBrand">
+          <span>COLLEGEXCHANGE</span>
+        </div>
+
+        <div class="nav-actions">
+          <button class="btn btn-sm btn-primary" id="btnNavMarketplace">Marketplace</button>
+          <button class="btn btn-sm btn-outline" id="btnNavDashboard">
+            My Dashboard <span id="favCountBadge" style="display:none; opacity:0.85;">(0)</span>
+          </button>
+          <button class="btn btn-primary" id="btnNavSell">+ Sell Item</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      <!-- VIEW 1: MARKETPLACE CATALOG -->
+      <section id="viewMarketplace">
+        <!-- Editorial Hero -->
+        <div class="hero-section">
+          <h1 class="hero-title">
+            Things <span class="editorial-italic">change hands.</span>
+          </h1>
+          <p class="hero-subtitle">
+            A centralized campus marketplace for textbooks, lab gear, cycles, and hostel essentials sitting unused across your college.
+          </p>
+        </div>
+
+        <!-- Search Container -->
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search calculators, cycles, textbooks, hostel mattresses...">
+          </div>
+        </div>
+
+        <!-- Category Bar -->
+        <div class="category-tab-strip" id="categoryTabStrip">
+          <!-- Dynamically populated categories -->
+        </div>
+
+        <!-- Toolbar Filters -->
+        <div class="catalog-toolbar">
+          <div class="results-count" id="resultsCount">
+            Showing <strong>0</strong> campus items
+          </div>
+          <div class="filter-sort-controls">
+            <select id="filterListingType" class="select-control">
+              <option value="">All Listing Types</option>
+              <option value="BUY">For Sale Only</option>
+              <option value="RENT">For Rent (Monthly)</option>
+              <option value="BOTH">Buy & Rent Available</option>
+            </select>
+            <select id="selectSort" class="select-control">
+              <option value="newest">Newest First</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid" id="productGrid">
+          <!-- Dynamically rendered product cards -->
+        </div>
+      </section>
+
+      <!-- VIEW 2: STUDENT DASHBOARD -->
+      <section id="viewDashboard" style="display: none;">
+        <div style="background: var(--bg-surface); padding: 24px; border: 1px solid var(--border-light); border-radius: var(--radius-md); margin-bottom: 28px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">
+                STUDENT DASHBOARD
+              </span>
+              <h2 style="font-size: 1.5rem; font-weight: 800;" id="dashUserName">Aarav Sharma</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);" id="dashUserMeta">
+                Computer Science & Engineering • 3rd Year • Hostel B
+              </p>
+            </div>
+            <div style="display: flex; gap: 16px; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">
+              <div>Active Listings: <strong style="color: var(--text-main); font-size: 1rem;" id="dashStatListings">0</strong></div>
+              <div>Saved Items: <strong style="color: var(--text-main); font-size: 1rem;" id="dashStatFavorites">0</strong></div>
+              <div>Messages: <strong style="color: var(--text-main); font-size: 1rem;" id="dashStatMessages">0</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Tabs -->
+        <div style="display: flex; gap: 12px; border-bottom: 1px solid var(--border-light); margin-bottom: 24px;">
+          <button class="btn btn-primary" id="tabMyListings">My Listings</button>
+          <button class="btn btn-outline" id="tabSavedItems">Saved Favorites</button>
+          <button class="btn btn-outline" id="tabMessages">Marketplace Messages</button>
+        </div>
+
+        <!-- Tab Content Container -->
+        <div id="dashTabContent">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+    </main>
+
+    <!-- PRODUCT DETAIL MODAL -->
+    <div class="modal-overlay" id="modalProductDetail" style="display: none;">
+      <div class="modal-container" style="max-width: 840px;">
+        <div class="modal-header">
+          <div>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);" id="detailCategoryLocation">
+              ACADEMIC • LIBRARY BLOCK
+            </span>
+            <h2 class="modal-title" id="detailTitle">Product Title</h2>
+          </div>
+          <button class="modal-close" id="btnCloseDetail">×</button>
+        </div>
+
+        <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+          <div style="background: var(--bg-subtle); border-radius: var(--radius-md); overflow: hidden; min-height: 280px;">
+            <img id="detailImage" src="/uploads/sample_product.svg" alt="Product Image" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+
+          <div style="display: flex; flex-direction: column;">
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; flex-direction: column; gap: 4px;" id="detailPriceContainer">
+                <div style="font-size: 1.8rem; font-weight: 800; color: var(--brand-accent);" id="detailPrice">₹0 (Full Purchase)</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: #1E40AF;" id="detailRentPrice">₹0 / month (Monthly Rent)</div>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                <span class="condition-badge" style="position: static;" id="detailCondition">GOOD CONDITION</span>
+                <span class="condition-badge" style="position: static; background: #3B82F6;" id="detailListingTypeBadge">BUY & RENT</span>
+                <span class="condition-badge" style="position: static; background: var(--brand-accent);" id="detailStatus">ACTIVE</span>
+              </div>
+            </div>
+
+            <p style="font-size: 0.9rem; color: var(--text-main); line-height: 1.6; margin-bottom: 20px;" id="detailDescription">
+              Product description goes here...
+            </p>
+
+            <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); margin-bottom: 24px; font-size: 0.85rem;">
+              <div style="font-weight: 700; margin-bottom: 4px;">SELLER INFO</div>
+              <div id="detailSellerName">Aarav Sharma</div>
+              <div style="color: var(--text-muted);" id="detailSellerLocation">Location: Library Block</div>
+            </div>
+
+            <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;" id="detailActions">
+              <!-- Dynamically populated buttons -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELL ITEM MODAL (4-STEP PROGRESSIVE) -->
+    <div class="modal-overlay" id="modalSellItem" style="display: none;">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);" id="sellStepLabel">
+              STEP 01 OF 04
+            </span>
+            <h2 class="modal-title" id="sellStepTitle">What are you selling or renting?</h2>
+          </div>
+          <button class="modal-close" id="btnCloseSell">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="step-indicator">
+            <div class="step-pill active" id="pillStep1"></div>
+            <div class="step-pill" id="pillStep2"></div>
+            <div class="step-pill" id="pillStep3"></div>
+            <div class="step-pill" id="pillStep4"></div>
+          </div>
+
+          <div id="sellError" style="display: none; padding: 10px 14px; background: #FFF5F5; border: 1px solid #FEB2B2; border-radius: var(--radius-sm); color: #9B2C2C; font-size: 0.85rem; margin-bottom: 16px;"></div>
+
+          <!-- STEP 1: Category -->
+          <div id="sellStep1">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" id="sellCategoryList">
+              <!-- Categories -->
+            </div>
+          </div>
+
+          <!-- STEP 2: Title, Condition, Description -->
+          <div id="sellStep2" style="display: none;">
+            <div class="form-group">
+              <label class="form-label">Item Title</label>
+              <input type="text" id="sellTitle" class="form-control" placeholder="e.g. Casio fx-991CW Scientific Calculator">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Condition</label>
+              <select id="sellCondition" class="form-control">
+                <option value="NEW">NEW (Unopened/Unused)</option>
+                <option value="LIKE_NEW">LIKE_NEW (Mint condition)</option>
+                <option value="GOOD" selected>GOOD (Lightly used, fully working)</option>
+                <option value="FAIR">FAIR (Visible wear)</option>
+                <option value="POOR">POOR (Heavy wear)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea id="sellDescription" class="form-control" placeholder="Describe your item, usage details, accessories included..."></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 3: Price & Location -->
+          <div id="sellStep3" style="display: none;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+              Specify how you want to offer your item. You can set a <strong>Full Buy Price</strong>, a <strong>Monthly Rent Price</strong>, or <strong>both options</strong>!
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label">Full Purchase Price (₹)</label>
+                <input type="number" id="sellPrice" class="form-control" placeholder="e.g. 850 (Full cost to buy)">
+                <span style="font-size:0.75rem; color:var(--text-muted);">Leave empty if not for sale</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Monthly Rent Price (₹/mo)</label>
+                <input type="number" id="sellRentPrice" class="form-control" placeholder="e.g. 120 (Rent per month)">
+                <span style="font-size:0.75rem; color:var(--text-muted);">Leave empty if not for rent</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 8px;">
+              <label class="form-label">Campus Pickup Location</label>
+              <select id="sellLocation" class="form-control">
+                <option value="Library Block">Library Block</option>
+                <option value="Academic Block">Academic Block</option>
+                <option value="Hostel A">Hostel A</option>
+                <option value="Hostel B">Hostel B</option>
+                <option value="Cafeteria">Cafeteria</option>
+                <option value="Sports Complex">Sports Complex</option>
+                <option value="Main Gate">Main Gate</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- STEP 4: Review -->
+          <div id="sellStep4" style="display: none;">
+            <div style="background: var(--bg-subtle); padding: 20px; border-radius: var(--radius-md);">
+              <h4 style="margin-bottom: 12px;" id="reviewTitle">Item Title</h4>
+              <div style="display:flex; gap:16px; align-items:center; margin-bottom: 12px;">
+                <div style="font-size: 1.3rem; font-weight: 800; color: var(--brand-accent);" id="reviewPrice">Buy: ₹0</div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #1E40AF;" id="reviewRentPrice">Rent: ₹0 / month</div>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>Category: <strong id="reviewCategory">Academic</strong></div>
+                <div>Option: <strong id="reviewListingType">BUY & RENT</strong></div>
+                <div>Condition: <strong id="reviewCondition">GOOD</strong></div>
+                <div>Pickup: <strong id="reviewLocation">Library Block</strong></div>
+                <div>Seller: <strong id="reviewSeller">Aarav Sharma</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnSellBack" style="display: none;">Back</button>
+          <button class="btn btn-primary" id="btnSellNext">Next Step</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT SELLER MODAL -->
+    <div class="modal-overlay" id="modalContactSeller" style="display: none;">
+      <div class="modal-container" style="max-width: 520px;">
+        <div class="modal-header">
+          <div>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">
+              CONTACT SELLER
+            </span>
+            <h2 class="modal-title" id="contactSellerName">Seller Name</h2>
+          </div>
+          <button class="modal-close" id="btnCloseContact">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem;" id="contactListingContext">
+            Regarding: <strong>Listing Title</strong>
+          </div>
+
+          <div class="form-group" id="contactDealTypeGroup">
+            <label class="form-label">I want to</label>
+            <select id="contactDealType" class="form-control">
+              <option value="BUY">Buy item outright</option>
+              <option value="RENT">Rent item on a monthly basis</option>
+            </select>
+          </div>
+
+          <div id="contactError" style="display: none; color: var(--brand-alert); font-size: 0.85rem; margin-bottom: 12px;"></div>
+
+          <div class="form-group">
+            <label class="form-label">Your Message</label>
+            <textarea id="contactMessageContent" class="form-control" rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btnCancelContact">Cancel</button>
+          <button class="btn btn-primary" id="btnSendContact">Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

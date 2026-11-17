@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" fill="#F4F3EF"/>
+  <rect x="100" y="50" width="400" height="300" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <circle cx="210" cy="220" r="65" stroke="#1E293B" stroke-width="12" fill="none"/>
+  <circle cx="390" cy="220" r="65" stroke="#1E293B" stroke-width="12" fill="none"/>
+  <path d="M210 220 L280 140 L370 140 L390 220 L300 220 Z" stroke="#0F5132" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M280 140 L260 110 L290 110" stroke="#1E293B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M370 140 L390 220" stroke="#0F5132" stroke-width="8"/>
+  <text x="300" y="340" fill="#0F5132" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="middle">DECATHLON RIVERSIDE 120</text>
+</svg>
