@@ -1,0 +1,240 @@
+[
+  {
+    "id": "lst_1791641139425",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_001",
+    "category_name": "Academic",
+    "title": "Lab Coat & Safety Goggles",
+    "description": "Clean white lab coat size L with UV protection goggles",
+    "price": 300,
+    "rent_price": 50,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Academic Block",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/sample_product.jpg"
+    ],
+    "created_at": "2026-10-10T14:05:39.425Z",
+    "updated_at": "2026-10-10T14:05:39.425Z"
+  },
+  {
+    "id": "lst_1791640815445",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_001",
+    "category_name": "Academic",
+    "title": "Lab Coat & Safety Goggles",
+    "description": "Clean white lab coat size L with UV protection goggles",
+    "price": 300,
+    "condition": "GOOD",
+    "location": "Academic Block",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/sample_product.jpg"
+    ],
+    "created_at": "2026-10-10T14:00:15.445Z",
+    "updated_at": "2026-10-10T14:00:15.445Z"
+  },
+  {
+    "id": "lst_1791631616879",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_002",
+    "category_name": "Books",
+    "title": "7yhxd",
+    "description": "aqebzgydsh",
+    "price": 130,
+    "rent_price": 30,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Hostel A",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/sample_product.svg"
+    ],
+    "created_at": "2026-10-10T11:26:56.879Z",
+    "updated_at": "2026-10-10T11:27:25.660Z"
+  },
+  {
+    "id": "lst_1791486189321",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_003",
+    "category_name": "Electronics",
+    "title": "Logitech Monitor",
+    "description": "Unused monitor",
+    "price": 1200,
+    "rent_price": 200,
+    "listing_type": "BOTH",
+    "condition": "NEW",
+    "location": "Hostel A",
+    "status": "DELETED",
+    "images": [
+      "/uploads/sample_product.svg"
+    ],
+    "created_at": "2026-10-08T19:03:09.321Z",
+    "updated_at": "2026-10-08T19:03:43.270Z"
+  },
+  {
+    "id": "lst_001",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_001",
+    "category_name": "Academic",
+    "title": "Casio fx-991CW Scientific Calculator",
+    "description": "Mint condition 991CW scientific calculator with ClassWiz display. Purchased last semester for Engineering Mathematics. Comes with original protective cover.",
+    "price": 850,
+    "rent_price": 120,
+    "listing_type": "BOTH",
+    "condition": "LIKE_NEW",
+    "location": "Library Block",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/casio_calculator.svg"
+    ],
+    "created_at": "2026-10-05T14:30:00.000Z",
+    "updated_at": "2026-10-08T19:20:33.566Z"
+  },
+  {
+    "id": "lst_002",
+    "seller_id": "usr_002",
+    "seller_name": "Riya Patel",
+    "category_id": "cat_006",
+    "category_name": "Sports",
+    "title": "Decathlon Riverside 120 Hybrid Cycle",
+    "description": "Single-owner hybrid cycle in great riding condition. Front and rear brakes freshly tuned. Includes memory foam saddle seat cover and heavy-duty steel lock.",
+    "price": 4200,
+    "rent_price": 450,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Hostel A",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/decathlon_cycle.svg"
+    ],
+    "created_at": "2026-10-04T09:15:00.000Z",
+    "updated_at": "2026-10-04T09:15:00.000Z"
+  },
+  {
+    "id": "lst_003",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_001",
+    "category_name": "Academic",
+    "title": "Complete Engineering Drawing Kit",
+    "description": "Mini drafter, A2 drawing board, set squares, compass set, and sheet container. Essential for 1st-year engineering graphics lab.",
+    "price": 650,
+    "rent_price": 100,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Academic Block",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/drawing_kit.svg"
+    ],
+    "created_at": "2026-10-03T16:45:00.000Z",
+    "updated_at": "2026-10-08T19:01:12.932Z"
+  },
+  {
+    "id": "lst_004",
+    "seller_id": "usr_003",
+    "seller_name": "Ananya Sen",
+    "category_id": "cat_003",
+    "category_name": "Electronics",
+    "title": "Sony WH-CH520 Wireless Headphones",
+    "description": "Beige Bluetooth headphones with 50-hour battery life and multi-point connectivity. Used lightly for library study sessions. Cleaned and sanitized.",
+    "price": 2400,
+    "rent_price": 0,
+    "listing_type": "BUY",
+    "condition": "LIKE_NEW",
+    "location": "Cafeteria",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/sony_headphones.svg"
+    ],
+    "created_at": "2026-10-02T11:20:00.000Z",
+    "updated_at": "2026-10-02T11:20:00.000Z"
+  },
+  {
+    "id": "lst_005",
+    "seller_id": "usr_002",
+    "seller_name": "Riya Patel",
+    "category_id": "cat_004",
+    "category_name": "Hostel",
+    "title": "Orthopedic Single Foam Mattress (3x6 ft)",
+    "description": "High-density 4-inch foam hostel mattress with cotton cover. Clean and well-maintained. Perfect fit for standard college hostel cots.",
+    "price": 1200,
+    "rent_price": 200,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Hostel A",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/hostel_mattress.svg"
+    ],
+    "created_at": "2026-10-01T18:00:00.000Z",
+    "updated_at": "2026-10-01T18:00:00.000Z"
+  },
+  {
+    "id": "lst_006",
+    "seller_id": "usr_003",
+    "seller_name": "Ananya Sen",
+    "category_id": "cat_002",
+    "category_name": "Books",
+    "title": "Higher Engineering Mathematics by B.S. Grewal (44th Ed)",
+    "description": "Clean copy without any pen/highlighter markings. Essential reference book for CSE, ECE, and ME 1st and 2nd years.",
+    "price": 450,
+    "rent_price": 50,
+    "listing_type": "BOTH",
+    "condition": "GOOD",
+    "location": "Library Block",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/bs_grewal_book.svg"
+    ],
+    "created_at": "2026-09-28T10:10:00.000Z",
+    "updated_at": "2026-09-28T10:10:00.000Z"
+  },
+  {
+    "id": "lst_007",
+    "seller_id": "usr_001",
+    "seller_name": "Aarav Sharma",
+    "category_id": "cat_003",
+    "category_name": "Electronics",
+    "title": "Anker 7-in-1 USB-C Hub Adapter",
+    "description": "HDMI 4K, 100W Power Delivery, SD Card Reader, and 3x USB 3.0 ports. Aluminum body. Works flawlessly with MacBooks and Windows laptops.",
+    "price": 1800,
+    "rent_price": 0,
+    "listing_type": "BUY",
+    "condition": "LIKE_NEW",
+    "location": "Hostel B",
+    "status": "ACTIVE",
+    "images": [
+      "/uploads/usbc_hub.svg"
+    ],
+    "created_at": "2026-09-25T15:00:00.000Z",
+    "updated_at": "2026-10-08T19:01:38.673Z"
+  },
+  {
+    "id": "lst_008",
+    "seller_id": "usr_002",
+    "seller_name": "Riya Patel",
+    "category_id": "cat_008",
+    "category_name": "Accessories",
+    "title": "Wildcraft 35L College Backpack (Black)",
+    "description": "Durable water-resistant backpack with padded laptop sleeve, dual bottle holders, and rain cover included.",
+    "price": 750,
+    "rent_price": 0,
+    "listing_type": "BUY",
+    "condition": "FAIR",
+    "location": "Main Gate",
+    "status": "SOLD",
+    "images": [
+      "/uploads/wildcraft_backpack.svg"
+    ],
+    "created_at": "2026-09-20T12:00:00.000Z",
+    "updated_at": "2026-09-26T09:30:00.000Z"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "msg_001",
+    "listing_id": "lst_001",
+    "sender_id": "usr_002",
+    "sender_name": "Riya Patel",
+    "receiver_id": "usr_001",
+    "receiver_name": "Aarav Sharma",
+    "content": "Hi Aarav! Is the Casio fx-991CW calculator still available? Can we meet near the Library Block tomorrow around 2 PM?",
+    "created_at": "2026-10-05T16:00:00.000Z"
+  },
+  {
+    "id": "msg_002",
+    "listing_id": "lst_001",
+    "sender_id": "usr_001",
+    "sender_name": "Aarav Sharma",
+    "receiver_id": "usr_002",
+    "receiver_name": "Riya Patel",
+    "content": "Hey Riya, yes it is available! 2 PM at Library Block works great for me. See you there.",
+    "created_at": "2026-10-05T16:15:00.000Z"
+  },
+  {
+    "id": "msg_003",
+    "listing_id": "lst_002",
+    "sender_id": "usr_001",
+    "sender_name": "Aarav Sharma",
+    "receiver_id": "usr_002",
+    "receiver_name": "Riya Patel",
+    "content": "Hi Riya, is the Decathlon hybrid cycle negotiable for ₹3800? I can pick it up today from Hostel A.",
+    "created_at": "2026-10-04T11:00:00.000Z"
+  }
+]

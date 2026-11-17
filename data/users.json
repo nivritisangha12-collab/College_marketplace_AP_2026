@@ -1,0 +1,35 @@
+[
+  {
+    "id": "usr_001",
+    "name": "Aarav Sharma",
+    "email": "aarav.sharma@college.edu",
+    "role": "STUDENT",
+    "department": "Computer Science & Engineering",
+    "year": "3rd Year",
+    "hostel": "Hostel B",
+    "phone": "+91 98765 43210",
+    "created_at": "2026-08-15T10:00:00.000Z"
+  },
+  {
+    "id": "usr_002",
+    "name": "Riya Patel",
+    "email": "riya.patel@college.edu",
+    "role": "STUDENT",
+    "department": "Electronics & Communication",
+    "year": "2nd Year",
+    "hostel": "Hostel A",
+    "phone": "+91 98123 45678",
+    "created_at": "2026-08-18T11:30:00.000Z"
+  },
+  {
+    "id": "usr_003",
+    "name": "Ananya Sen",
+    "email": "ananya.sen@college.edu",
+    "role": "STUDENT",
+    "department": "Mechanical Engineering",
+    "year": "4th Year",
+    "hostel": "Day Scholar",
+    "phone": "+91 97654 32109",
+    "created_at": "2026-08-20T14:15:00.000Z"
+  }
+]
