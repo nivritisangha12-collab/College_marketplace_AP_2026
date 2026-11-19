@@ -131,3 +131,81 @@ WHERE l.status = 'ACTIVE'
 GROUP BY c.id, c.name
 HAVING COUNT(l.id) >= 1
 ORDER BY total_active_listings DESC, avg_price DESC;
+
+
+-- ============================================================================
+-- QUERY 5: Student Bargain Deals Below Category Average Price
+-- ============================================================================
+-- Business Question:
+--   Which active items are priced strictly below the average price of their
+--   respective category, and how much do students save compared to the average?
+--
+-- SQL Concepts Demonstrated:
+--   Correlated subquery in the WHERE clause, scalar subquery in the SELECT list,
+--   computed difference (savings), multi-table INNER JOIN, mathematical sorting.
+-- ============================================================================
+
+SELECT 
+    l.id AS listing_id,
+    l.title,
+    c.name AS category_name,
+    l.price AS item_price,
+    ROUND((
+        SELECT AVG(l_sub.price) 
+        FROM "Listing" l_sub 
+        WHERE l_sub.category_id = l.category_id 
+          AND l_sub.status = 'ACTIVE'
+    ), 2) AS category_avg_price,
+    ROUND((
+        (SELECT AVG(l_sub.price) FROM "Listing" l_sub WHERE l_sub.category_id = l.category_id AND l_sub.status = 'ACTIVE') - l.price
+    ), 2) AS student_savings,
+    u.name AS seller_name
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+WHERE l.status = 'ACTIVE'
+  AND l.price < (
+      SELECT AVG(l2.price)
+      FROM "Listing" l2
+      WHERE l2.category_id = l.category_id
+        AND l2.status = 'ACTIVE'
+  )
+ORDER BY student_savings DESC;
+
+
+-- ============================================================================
+-- QUERY 6: High-Demand Items with Confirmed Student Engagement
+-- ============================================================================
+-- Business Question:
+--   Which active listings have confirmed student demand—either having
+--   active buyer chat inquiries or having been saved into wishlists?
+--
+-- SQL Concepts Demonstrated:
+--   EXISTS operator with correlated subqueries, compound boolean logic,
+--   CASE statement categorizing multi-channel engagement levels.
+-- ============================================================================
+
+SELECT 
+    l.id AS listing_id,
+    l.title,
+    c.name AS category,
+    l.price,
+    u.name AS seller_name,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id) 
+         AND EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'High Demand (Wishlisted & Inquired)'
+        WHEN EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'Inquired by Buyer'
+        ELSE 'Bookmarked in Wishlist'
+    END AS engagement_level
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+WHERE l.status = 'ACTIVE'
+  AND (
+      EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id)
+      OR
+      EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id)
+  )
+ORDER BY l.price DESC;
