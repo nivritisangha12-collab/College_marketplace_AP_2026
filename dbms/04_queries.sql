@@ -74,3 +74,32 @@ WHERE l.status = 'ACTIVE'
   AND l.location IN ('Hostel A', 'Library Block')
   AND l.condition IN ('GOOD', 'LIKE_NEW')
 ORDER BY l.rent_price DESC, l.price DESC;
+
+
+-- ============================================================================
+-- QUERY 3: Student Seller Activity & Revenue Dashboard
+-- ============================================================================
+-- Business Question:
+--   For every campus student, what is their complete sales track record:
+--   total listings posted, active items, sold items, and gross sales revenue
+--   (ensuring students with zero listings or zero sales are accounted for)?
+--
+-- SQL Concepts Demonstrated:
+--   LEFT OUTER JOIN, conditional aggregation (SUM/COUNT with CASE WHEN),
+--   COALESCE() for graceful NULL replacement, GROUP BY multi-column grouping.
+-- ============================================================================
+
+SELECT 
+    u.id AS student_id,
+    u.name AS student_name,
+    u.department,
+    u.hostel,
+    COUNT(l.id) AS total_listings_created,
+    SUM(CASE WHEN l.status = 'ACTIVE' THEN 1 ELSE 0 END) AS active_listings_count,
+    SUM(CASE WHEN l.status = 'SOLD' THEN 1 ELSE 0 END) AS sold_items_count,
+    COALESCE(SUM(CASE WHEN l.status = 'SOLD' THEN l.price ELSE 0.00 END), 0.00) AS gross_sales_revenue
+FROM "User" u
+LEFT JOIN "Listing" l ON u.id = l.seller_id
+WHERE u.role = 'STUDENT'
+GROUP BY u.id, u.name, u.department, u.hostel
+ORDER BY sold_items_count DESC, gross_sales_revenue DESC, total_listings_created DESC;
