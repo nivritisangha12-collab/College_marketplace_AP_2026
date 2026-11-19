@@ -382,3 +382,42 @@ SELECT
 FROM RankedHostelListings
 WHERE item_rank <= 2
 ORDER BY campus_residence ASC, item_rank ASC;
+
+
+-- ============================================================================
+-- QUERY 12: Safe Atomic Purchase Transaction (State Transition & Rollback)
+-- ============================================================================
+-- Business Question:
+--   How does the platform execute a safe, atomic state transition when an
+--   item is sold (marking status='SOLD' and updating the timestamp), verifying
+--   the change within a transaction block before rolling back to preserve test data?
+--
+-- SQL Concepts Demonstrated:
+--   ACID transactions: BEGIN TRANSACTION, targeted UPDATE statement with state
+--   guard (status = 'ACTIVE'), post-update verification SELECT, and safe
+--   ROLLBACK TRANSACTION to prevent seed data corruption during script execution.
+-- ============================================================================
+
+-- Step 1: Begin atomic transaction block
+BEGIN TRANSACTION;
+
+-- Step 2: Transition listing 'lst_001' from ACTIVE to SOLD upon buyer completion
+UPDATE "Listing"
+SET status = 'SOLD',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = 'lst_001'
+  AND status = 'ACTIVE';
+
+-- Step 3: Verify the mutated record state within the uncommitted transaction
+SELECT 
+    id AS listing_id,
+    title,
+    seller_id,
+    price,
+    status AS updated_status,
+    updated_at
+FROM "Listing"
+WHERE id = 'lst_001';
+
+-- Step 4: Safely roll back transaction to keep persistent database in pristine state
+ROLLBACK TRANSACTION;
