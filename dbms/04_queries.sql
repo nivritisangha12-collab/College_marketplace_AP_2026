@@ -249,3 +249,62 @@ SELECT
 FROM CategoryAggregates ca
 CROSS JOIN MarketTotals mt
 ORDER BY ca.category_value DESC;
+
+
+-- ============================================================================
+-- QUERY 8: Campus Wishlist Leaderboard (Most Favorited Items)
+-- ============================================================================
+-- Business Question:
+--   Which active marketplace items have been bookmarked/favorited most frequently
+--   by fellow students, and who are the sellers?
+--
+-- SQL Concepts Demonstrated:
+--   Multi-table LEFT JOIN (Listing -> Favorite, Listing -> User, Listing -> Category),
+--   GROUP BY on primary key and entity attributes, COUNT(f.id) aggregation,
+--   HAVING count > 0 filter, tie-breaker sorting.
+-- ============================================================================
+
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category_name,
+    l.price,
+    u.name AS seller_name,
+    u.hostel AS pickup_location,
+    COUNT(f.id) AS total_saves
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+LEFT JOIN "Favorite" f ON l.id = f.listing_id
+WHERE l.status = 'ACTIVE'
+GROUP BY l.id, l.title, c.name, l.price, u.name, u.hostel
+HAVING COUNT(f.id) > 0
+ORDER BY total_saves DESC, l.price ASC;
+
+
+-- ============================================================================
+-- QUERY 9: In-App Buyer-Seller Inquiry Thread Log
+-- ============================================================================
+-- Business Question:
+--   What are all contextual chat inquiries initiated between buyers and
+--   sellers regarding specific marketplace items, sorted from newest to oldest?
+--
+-- SQL Concepts Demonstrated:
+--   Multiple joins referencing the same parent entity ("User" aliased as sender
+--   and receiver), multi-table join with "Listing", timestamp ordering.
+-- ============================================================================
+
+SELECT 
+    m.id AS message_id,
+    l.title AS item_title,
+    sender.name AS buyer_name,
+    sender.department AS buyer_department,
+    receiver.name AS seller_name,
+    receiver.hostel AS seller_hostel,
+    m.content AS inquiry_message,
+    m.created_at AS sent_at
+FROM "Message" m
+INNER JOIN "Listing" l ON m.listing_id = l.id
+INNER JOIN "User" sender ON m.sender_id = sender.id
+INNER JOIN "User" receiver ON m.receiver_id = receiver.id
+ORDER BY m.created_at DESC;
