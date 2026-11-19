@@ -103,3 +103,31 @@ LEFT JOIN "Listing" l ON u.id = l.seller_id
 WHERE u.role = 'STUDENT'
 GROUP BY u.id, u.name, u.department, u.hostel
 ORDER BY sold_items_count DESC, gross_sales_revenue DESC, total_listings_created DESC;
+
+
+-- ============================================================================
+-- QUERY 4: Category Inventory & Price Range Analytics
+-- ============================================================================
+-- Business Question:
+--   What are the listing counts, minimum price, average price, maximum price,
+--   and total valuation for each category with active items on campus?
+--
+-- SQL Concepts Demonstrated:
+--   INNER JOIN, GROUP BY on primary & descriptive columns, aggregate functions
+--   (COUNT, MIN, AVG, MAX, SUM), ROUND() formatting, HAVING clause filter.
+-- ============================================================================
+
+SELECT 
+    c.id AS category_id,
+    c.name AS category_name,
+    COUNT(l.id) AS total_active_listings,
+    MIN(l.price) AS min_price,
+    ROUND(AVG(l.price), 2) AS avg_price,
+    MAX(l.price) AS max_price,
+    ROUND(SUM(l.price), 2) AS total_category_valuation
+FROM "Category" c
+INNER JOIN "Listing" l ON c.id = l.category_id
+WHERE l.status = 'ACTIVE'
+GROUP BY c.id, c.name
+HAVING COUNT(l.id) >= 1
+ORDER BY total_active_listings DESC, avg_price DESC;
