@@ -4,6 +4,9 @@
 -- File: dbms/04_queries.sql
 -- Compatible With: SQLite / PostgreSQL / MySQL (ANSI SQL Standard)
 -- Target Schema: dbms/03_schema.sql | Target Database: prisma/dev.db
+-- Description: 12 comprehensive SQL queries ordered from foundational
+--              filters to advanced analytics, subqueries, CTEs, window
+--              functions, and atomic transactional operations.
 -- ============================================================================
 
 
@@ -77,7 +80,35 @@ ORDER BY l.rent_price DESC, l.price DESC;
 
 
 -- ============================================================================
--- QUERY 3: Student Seller Activity & Revenue Dashboard
+-- QUERY 3: Category Inventory & Price Range Analytics
+-- ============================================================================
+-- Business Question:
+--   What are the listing counts, minimum price, average price, maximum price,
+--   and total valuation for each category with active items on campus?
+--
+-- SQL Concepts Demonstrated:
+--   INNER JOIN, GROUP BY on primary & descriptive columns, aggregate functions
+--   (COUNT, MIN, AVG, MAX, SUM), ROUND() formatting, HAVING clause filter.
+-- ============================================================================
+
+SELECT 
+    c.id AS category_id,
+    c.name AS category_name,
+    COUNT(l.id) AS total_active_listings,
+    MIN(l.price) AS min_price,
+    ROUND(AVG(l.price), 2) AS avg_price,
+    MAX(l.price) AS max_price,
+    ROUND(SUM(l.price), 2) AS total_category_valuation
+FROM "Category" c
+INNER JOIN "Listing" l ON c.id = l.category_id
+WHERE l.status = 'ACTIVE'
+GROUP BY c.id, c.name
+HAVING COUNT(l.id) >= 1
+ORDER BY total_active_listings DESC, avg_price DESC;
+
+
+-- ============================================================================
+-- QUERY 4: Student Seller Activity & Revenue Dashboard
 -- ============================================================================
 -- Business Question:
 --   For every campus student, what is their complete sales track record:
@@ -106,35 +137,66 @@ ORDER BY sold_items_count DESC, gross_sales_revenue DESC, total_listings_created
 
 
 -- ============================================================================
--- QUERY 4: Category Inventory & Price Range Analytics
+-- QUERY 5: Campus Wishlist Leaderboard (Most Favorited Items)
 -- ============================================================================
 -- Business Question:
---   What are the listing counts, minimum price, average price, maximum price,
---   and total valuation for each category with active items on campus?
+--   Which active marketplace items have been bookmarked/favorited most frequently
+--   by fellow students, and who are the sellers?
 --
 -- SQL Concepts Demonstrated:
---   INNER JOIN, GROUP BY on primary & descriptive columns, aggregate functions
---   (COUNT, MIN, AVG, MAX, SUM), ROUND() formatting, HAVING clause filter.
+--   Multi-table LEFT JOIN (Listing -> Favorite, Listing -> User, Listing -> Category),
+--   GROUP BY on primary key and entity attributes, COUNT(f.id) aggregation,
+--   HAVING count > 0 filter, tie-breaker sorting.
 -- ============================================================================
 
 SELECT 
-    c.id AS category_id,
+    l.id AS listing_id,
+    l.title AS item_title,
     c.name AS category_name,
-    COUNT(l.id) AS total_active_listings,
-    MIN(l.price) AS min_price,
-    ROUND(AVG(l.price), 2) AS avg_price,
-    MAX(l.price) AS max_price,
-    ROUND(SUM(l.price), 2) AS total_category_valuation
-FROM "Category" c
-INNER JOIN "Listing" l ON c.id = l.category_id
+    l.price,
+    u.name AS seller_name,
+    u.hostel AS pickup_location,
+    COUNT(f.id) AS total_saves
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+LEFT JOIN "Favorite" f ON l.id = f.listing_id
 WHERE l.status = 'ACTIVE'
-GROUP BY c.id, c.name
-HAVING COUNT(l.id) >= 1
-ORDER BY total_active_listings DESC, avg_price DESC;
+GROUP BY l.id, l.title, c.name, l.price, u.name, u.hostel
+HAVING COUNT(f.id) > 0
+ORDER BY total_saves DESC, l.price ASC;
 
 
 -- ============================================================================
--- QUERY 5: Student Bargain Deals Below Category Average Price
+-- QUERY 6: In-App Buyer-Seller Inquiry Thread Log
+-- ============================================================================
+-- Business Question:
+--   What are all contextual chat inquiries initiated between buyers and
+--   sellers regarding specific marketplace items, sorted from newest to oldest?
+--
+-- SQL Concepts Demonstrated:
+--   Multiple joins referencing the same parent entity ("User" aliased as sender
+--   and receiver), multi-table join with "Listing", timestamp ordering.
+-- ============================================================================
+
+SELECT 
+    m.id AS message_id,
+    l.title AS item_title,
+    sender.name AS buyer_name,
+    sender.department AS buyer_department,
+    receiver.name AS seller_name,
+    receiver.hostel AS seller_hostel,
+    m.content AS inquiry_message,
+    m.created_at AS sent_at
+FROM "Message" m
+INNER JOIN "Listing" l ON m.listing_id = l.id
+INNER JOIN "User" sender ON m.sender_id = sender.id
+INNER JOIN "User" receiver ON m.receiver_id = receiver.id
+ORDER BY m.created_at DESC;
+
+
+-- ============================================================================
+-- QUERY 7: Student Bargain Deals Below Category Average Price
 -- ============================================================================
 -- Business Question:
 --   Which active items are priced strictly below the average price of their
@@ -174,7 +236,7 @@ ORDER BY student_savings DESC;
 
 
 -- ============================================================================
--- QUERY 6: High-Demand Items with Confirmed Student Engagement
+-- QUERY 8: High-Demand Items with Confirmed Student Engagement
 -- ============================================================================
 -- Business Question:
 --   Which active listings have confirmed student demand—either having
@@ -212,7 +274,7 @@ ORDER BY l.price DESC;
 
 
 -- ============================================================================
--- QUERY 7: Category Market Share & Valuation Breakdown (Common Table Expression - CTE)
+-- QUERY 9: Category Market Share & Valuation Breakdown (Common Table Expression - CTE)
 -- ============================================================================
 -- Business Question:
 --   Using CTEs, what is the inventory market share (listing percentage) and
@@ -249,65 +311,6 @@ SELECT
 FROM CategoryAggregates ca
 CROSS JOIN MarketTotals mt
 ORDER BY ca.category_value DESC;
-
-
--- ============================================================================
--- QUERY 8: Campus Wishlist Leaderboard (Most Favorited Items)
--- ============================================================================
--- Business Question:
---   Which active marketplace items have been bookmarked/favorited most frequently
---   by fellow students, and who are the sellers?
---
--- SQL Concepts Demonstrated:
---   Multi-table LEFT JOIN (Listing -> Favorite, Listing -> User, Listing -> Category),
---   GROUP BY on primary key and entity attributes, COUNT(f.id) aggregation,
---   HAVING count > 0 filter, tie-breaker sorting.
--- ============================================================================
-
-SELECT 
-    l.id AS listing_id,
-    l.title AS item_title,
-    c.name AS category_name,
-    l.price,
-    u.name AS seller_name,
-    u.hostel AS pickup_location,
-    COUNT(f.id) AS total_saves
-FROM "Listing" l
-INNER JOIN "Category" c ON l.category_id = c.id
-INNER JOIN "User" u ON l.seller_id = u.id
-LEFT JOIN "Favorite" f ON l.id = f.listing_id
-WHERE l.status = 'ACTIVE'
-GROUP BY l.id, l.title, c.name, l.price, u.name, u.hostel
-HAVING COUNT(f.id) > 0
-ORDER BY total_saves DESC, l.price ASC;
-
-
--- ============================================================================
--- QUERY 9: In-App Buyer-Seller Inquiry Thread Log
--- ============================================================================
--- Business Question:
---   What are all contextual chat inquiries initiated between buyers and
---   sellers regarding specific marketplace items, sorted from newest to oldest?
---
--- SQL Concepts Demonstrated:
---   Multiple joins referencing the same parent entity ("User" aliased as sender
---   and receiver), multi-table join with "Listing", timestamp ordering.
--- ============================================================================
-
-SELECT 
-    m.id AS message_id,
-    l.title AS item_title,
-    sender.name AS buyer_name,
-    sender.department AS buyer_department,
-    receiver.name AS seller_name,
-    receiver.hostel AS seller_hostel,
-    m.content AS inquiry_message,
-    m.created_at AS sent_at
-FROM "Message" m
-INNER JOIN "Listing" l ON m.listing_id = l.id
-INNER JOIN "User" sender ON m.sender_id = sender.id
-INNER JOIN "User" receiver ON m.receiver_id = receiver.id
-ORDER BY m.created_at DESC;
 
 
 -- ============================================================================
