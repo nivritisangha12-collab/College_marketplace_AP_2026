@@ -38,3 +38,39 @@ WHERE l.status = 'ACTIVE'
   AND c.slug IN ('academic', 'books')
 ORDER BY l.price ASC, l.created_at DESC
 LIMIT 10;
+
+
+-- ============================================================================
+-- QUERY 2: Multi-Option Semester Rental & Purchase Search
+-- ============================================================================
+-- Business Question:
+--   Which items located at 'Hostel A' or 'Library Block' are available in
+--   'GOOD' or 'LIKE_NEW' condition, and what are their rental vs purchase terms?
+--
+-- SQL Concepts Demonstrated:
+--   INNER JOIN, compound boolean predicates (AND, OR, IN), CASE WHEN expression
+--   for dynamic business classification, formatted attribute comparisons.
+-- ============================================================================
+
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category,
+    l.location AS campus_location,
+    l.condition,
+    l.price AS purchase_price,
+    l.rent_price AS semester_rent_price,
+    CASE 
+        WHEN l.listing_type = 'BOTH' THEN 'Available to Buy or Rent'
+        WHEN l.listing_type = 'RENT' THEN 'Semester Rental Only'
+        ELSE 'Purchase Only'
+    END AS transaction_option,
+    u.name AS seller_name,
+    u.phone AS seller_contact
+FROM "Listing" l
+INNER JOIN "User" u ON l.seller_id = u.id
+INNER JOIN "Category" c ON l.category_id = c.id
+WHERE l.status = 'ACTIVE'
+  AND l.location IN ('Hostel A', 'Library Block')
+  AND l.condition IN ('GOOD', 'LIKE_NEW')
+ORDER BY l.rent_price DESC, l.price DESC;
