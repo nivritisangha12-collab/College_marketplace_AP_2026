@@ -308,3 +308,77 @@ INNER JOIN "Listing" l ON m.listing_id = l.id
 INNER JOIN "User" sender ON m.sender_id = sender.id
 INNER JOIN "User" receiver ON m.receiver_id = receiver.id
 ORDER BY m.created_at DESC;
+
+
+-- ============================================================================
+-- QUERY 10: Departmental Listing Price & Recency Rankings (Window Functions)
+-- ============================================================================
+-- Business Question:
+--   Within each student seller's academic department, what is the relative
+--   price ranking and recency ranking of every active listing?
+--
+-- SQL Concepts Demonstrated:
+--   Window functions: DENSE_RANK() OVER (PARTITION BY ... ORDER BY ...),
+--   ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...), multi-column partitioning.
+-- ============================================================================
+
+SELECT 
+    u.department,
+    l.title AS item_title,
+    c.name AS category_name,
+    l.price AS item_price,
+    u.name AS seller_name,
+    DENSE_RANK() OVER (
+        PARTITION BY u.department 
+        ORDER BY l.price DESC
+    ) AS dept_price_rank,
+    ROW_NUMBER() OVER (
+        PARTITION BY u.department 
+        ORDER BY l.created_at DESC
+    ) AS dept_recency_rank
+FROM "Listing" l
+INNER JOIN "User" u ON l.seller_id = u.id
+INNER JOIN "Category" c ON l.category_id = c.id
+WHERE l.status = 'ACTIVE'
+ORDER BY u.department ASC, dept_price_rank ASC;
+
+
+-- ============================================================================
+-- QUERY 11: Top-2 Highest Value Listings per Campus Hostel (Window Function in CTE)
+-- ============================================================================
+-- Business Question:
+--   What are the top 2 highest-value listings originating from each student
+--   residential hostel on campus?
+--
+-- SQL Concepts Demonstrated:
+--   CTE encapsulating window ranking function ROW_NUMBER() OVER (PARTITION BY ...),
+--   outer query filtering on the calculated rank (WHERE item_rank <= 2).
+-- ============================================================================
+
+WITH RankedHostelListings AS (
+    SELECT 
+        u.hostel AS campus_residence,
+        l.title AS item_title,
+        c.name AS category_name,
+        l.price,
+        u.name AS seller_name,
+        ROW_NUMBER() OVER (
+            PARTITION BY u.hostel 
+            ORDER BY l.price DESC
+        ) AS item_rank
+    FROM "Listing" l
+    INNER JOIN "User" u ON l.seller_id = u.id
+    INNER JOIN "Category" c ON l.category_id = c.id
+    WHERE l.status = 'ACTIVE'
+      AND u.hostel IS NOT NULL
+)
+SELECT 
+    campus_residence,
+    item_rank,
+    item_title,
+    category_name,
+    price,
+    seller_name
+FROM RankedHostelListings
+WHERE item_rank <= 2
+ORDER BY campus_residence ASC, item_rank ASC;
