@@ -209,3 +209,43 @@ WHERE l.status = 'ACTIVE'
       EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id)
   )
 ORDER BY l.price DESC;
+
+
+-- ============================================================================
+-- QUERY 7: Category Market Share & Valuation Breakdown (Common Table Expression - CTE)
+-- ============================================================================
+-- Business Question:
+--   Using CTEs, what is the inventory market share (listing percentage) and
+--   economic valuation share of each category across all active campus listings?
+--
+-- SQL Concepts Demonstrated:
+--   Common Table Expressions (WITH clause) with multiple chained CTEs,
+--   CROSS JOIN with scalar aggregate CTE, percentage share calculations.
+-- ============================================================================
+
+WITH CategoryAggregates AS (
+    SELECT 
+        c.id AS category_id,
+        c.name AS category_name,
+        COUNT(l.id) AS active_count,
+        SUM(l.price) AS category_value
+    FROM "Category" c
+    INNER JOIN "Listing" l ON c.id = l.category_id
+    WHERE l.status = 'ACTIVE'
+    GROUP BY c.id, c.name
+),
+MarketTotals AS (
+    SELECT 
+        SUM(active_count) AS total_listings,
+        SUM(category_value) AS total_market_value
+    FROM CategoryAggregates
+)
+SELECT 
+    ca.category_name,
+    ca.active_count,
+    ROUND((ca.active_count * 100.0) / mt.total_listings, 2) AS inventory_share_pct,
+    ROUND(ca.category_value, 2) AS category_valuation,
+    ROUND((ca.category_value * 100.0) / mt.total_market_value, 2) AS value_share_pct
+FROM CategoryAggregates ca
+CROSS JOIN MarketTotals mt
+ORDER BY ca.category_value DESC;
