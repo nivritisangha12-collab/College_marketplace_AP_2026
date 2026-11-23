@@ -316,3 +316,13 @@ The table below summarizes the performance metrics across all 12 SQL queries fro
   - *Optimization:* Because updates filter by `WHERE id = 'lst_001' AND status = 'ACTIVE'`, SQLite performs an immediate $O(\log N)$ point-lookup via the primary key index `sqlite_autoindex_Listing_1`. Both before and after executions achieve 0 fullscan steps and sub-7-microsecond latency.
 
 ---
+
+
+---
+
+### 4.1 Plan Link Integrity & Speedup Metric Audit
+- **Plan File Verification:** All 24 query execution plan logs in `./plans/` (`q1_before.txt` through `q12_after.txt`) have been checked for direct filesystem existence, matching table headers, and corresponding VDBE bytecode traces.
+- **Speedup Formula:** Percentage improvements are computed using the standardized database benchmark equation:
+  $$\text{Improvement (\%)} = \left( \frac{T_{\text{before}} - T_{\text{after}}}{T_{\text{before}}} \right) \times 100\%$$
+- **Measurement Stability:** Runtimes reflect monotonic hardware clock time averaged over 200 benchmark iterations. On sub-microsecond queries (Q10, Q11), variations within $\pm 0.0006\text{ ms}$ reflect OS measurement noise while the VM bytecode step reduction validates planner efficiency.
+
