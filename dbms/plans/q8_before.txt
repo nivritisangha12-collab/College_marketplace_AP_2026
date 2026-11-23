@@ -1,0 +1,115 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 8: High-Demand Items with Confirmed Student Engagement
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q8
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title,
+    c.name AS category,
+    l.price,
+    u.name AS seller_name,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id) 
+         AND EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'High Demand (Wishlisted & Inquired)'
+        WHEN EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'Inquired by Buyer'
+        ELSE 'Bookmarked in Wishlist'
+    END AS engagement_level
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+WHERE l.status = 'ACTIVE'
+  AND (
+      EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id)
+      OR
+      EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id)
+  )
+ORDER BY l.price DESC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SCAN l
+|--CORRELATED SCALAR SUBQUERY 4
+|  `--SCAN f USING COVERING INDEX sqlite_autoindex_Favorite_2
+|--CORRELATED SCALAR SUBQUERY 5
+|  `--SCAN m
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SCAN f USING COVERING INDEX sqlite_autoindex_Favorite_2
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SCAN m
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SCAN m
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0109 ms (averaged over 200 runs)
+Virtual Machine Steps:   635
+Fullscan Table Steps:    62
+Sort Operations:         1
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SCAN l
+|--CORRELATED SCALAR SUBQUERY 4
+|  `--SCAN f USING COVERING INDEX sqlite_autoindex_Favorite_2
+|--CORRELATED SCALAR SUBQUERY 5
+|  `--SCAN m
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SCAN f USING COVERING INDEX sqlite_autoindex_Favorite_2
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SCAN m
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SCAN m
+`--USE TEMP B-TREE FOR ORDER BY
+lst_002|Decathlon Riverside 120 Hybrid Cycle|Sports|4200|Riya Patel|High Demand (Wishlisted & Inquired)
+lst_004|Sony WH-CH520 Wireless Headphones|Electronics|2400|Ananya Sen|High Demand (Wishlisted & Inquired)
+lst_001|Casio fx-991CW Scientific Calculator|Academic|850|Aarav Sharma|High Demand (Wishlisted & Inquired)
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|450|Ananya Sen|High Demand (Wishlisted & Inquired)
+Memory Used:                         230504 (max 234984) bytes
+Number of Outstanding Allocations:   449 (max 453)
+Number of Pcache Overflow Bytes:     5824 (max 5824) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                135 (max 320)
+Successful lookaside attempts:       750
+Lookaside failures due to size:      12
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    53248 bytes
+Page cache hits:                     21
+Page cache misses:                   11
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16656 bytes
+Statement Heap/Lookaside Usage:      67424 bytes
+Fullscan Steps:                      62
+Sort Operations:                     1
+Autoindex Inserts:                   0
+Virtual Machine Steps:               635
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        67424
+Run Time: real 0.000175 user 0.000149 sys 0.000026
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     109   0                    0   Start at 109\n1     SorterOpen     8     8     0     k(1,-B)        0   \n2     OpenRead       0     9     0     11             0   root=9 iDb=0; Listing\n3     OpenRead       1     5     0     2              0   root=5 iDb=0; Category\n4     OpenRead       9     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n5     OpenRead       2     2     0     2              0   root=2 iDb=0; User\n6     IfEmpty        2     97    0                    0   if( empty(2) ) goto 97\n7     OpenRead       10    3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n8     Rewind         0     97    0                    0   \n9       Column         0     10    1     ACTIVE         0   r[1]=Listing.status\n10      Ne             2     96    1     BINARY-8       82  if r[1]!=r[2] goto 96\n11      BeginSubrtn    0     3     0                    0   r[3]=NULL\n12        Integer        0     4     0                    0   r[4]=0; Init EXISTS result\n13        Integer        1     5     0                    0   r[5]=1; LIMIT counter\n14        OpenRead       11    15    0     k(2,,)         0   root=15 iDb=0; sqlite_autoindex_Favorite_2\n15        Rewind         11    22    6     0              0   \n16          Column         11    1     6                    0   r[6]= cursor 11 column 1\n17          Column         0     0     7                    0   r[7]= cursor 0 column 0\n18          Ne             7     21    6     BINARY-8       81  if r[6]!=r[7] goto 21\n19          Integer        1     4     0                    0   r[4]=1\n20          DecrJumpZero   5     22    0                    0   if (--r[5])==0 goto 22\n21        Next           11    16    0                    1   \n22      Return         3     12    1                    0   \n23      If             4     37    0                    0   \n24      BeginSubrtn    0     9     0                    0   r[9]=NULL\n25        Integer        0     10    0                    0   r[10]=0; Init EXISTS result
+================================================================================

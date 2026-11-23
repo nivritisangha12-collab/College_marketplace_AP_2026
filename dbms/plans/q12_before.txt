@@ -1,0 +1,84 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 12: Safe Atomic Purchase Transaction (State Transition & Rollback)
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q12
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+-- Step 1: Begin atomic transaction block
+BEGIN TRANSACTION;
+
+-- Step 2: Transition listing 'lst_001' from ACTIVE to SOLD upon buyer completion
+UPDATE "Listing"
+SET status = 'SOLD',
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = 'lst_001'
+  AND status = 'ACTIVE';
+
+-- Step 3: Verify the mutated record state within the uncommitted transaction
+SELECT 
+    id AS listing_id,
+    title,
+    seller_id,
+    price,
+    status AS updated_status,
+    updated_at
+FROM "Listing"
+WHERE id = 'lst_001';
+
+-- Step 4: Safely roll back transaction to keep persistent database in pristine state
+ROLLBACK TRANSACTION;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+`--SEARCH Listing USING INDEX sqlite_autoindex_Listing_1 (id=?)
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0069 ms (averaged over 200 runs)
+Virtual Machine Steps:   55
+Fullscan Table Steps:    0
+Sort Operations:         0
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+`--SEARCH Listing USING INDEX sqlite_autoindex_Listing_1 (id=?)
+Memory Used:                         205536 (max 228240) bytes
+Number of Outstanding Allocations:   438 (max 456)
+Number of Pcache Overflow Bytes:     9600 (max 18944) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                97 (max 168)
+Successful lookaside attempts:       321
+Lookaside failures due to size:      4
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    31488 bytes
+Page cache hits:                     4
+Page cache misses:                   6
+Page cache writes:                   2
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16640 bytes
+Statement Heap/Lookaside Usage:      11824 bytes
+Fullscan Steps:                      0
+Sort Operations:                     0
+Autoindex Inserts:                   0
+Virtual Machine Steps:               55
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        11824
+Run Time: real 0.000618 user 0.000155 sys 0.000423
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     58    0                    0   Start at 58\n1     Null           0     1     2                    0   r[1..2]=NULL\n2     Noop           2     0     1                    0   \n3     OpenWrite      0     9     0     13             0   root=9 iDb=0; Listing\n4     OpenWrite      1     10    0     k(1,)          2   root=10 iDb=0; sqlite_autoindex_Listing_1\n5     String8        0     16    0     lst_001        0   r[16]='lst_001'\n6     SeekGE         1     12    16    1              0   key=r[16]\n7     IdxGT          1     12    16    1              0   key=r[16]\n8     DeferredSeek   1     0     0                    0   Move 0 to 1.rowid if needed\n9     Column         0     10    17    ACTIVE         0   r[17]=Listing.status\n10    Ne             18    12    17    BINARY-8       82  if r[17]!=r[18] goto 12\n11    Rowid          0     2     0                    0   r[2]= rowid of 0\n12    IsNull         2     57    0                    0   if r[2]==NULL goto 57\n13    Column         0     0     3                    0   r[3]= cursor 0 column 0\n14    Column         0     1     4                    0   r[4]= cursor 0 column 1\n15    Column         0     2     5                    0   r[5]= cursor 0 column 2\n16    Column         0     3     6                    0   r[6]= cursor 0 column 3\n17    Column         0     4     7                    0   r[7]= cursor 0 column 4\n18    Column         0     5     8     0              0   r[8]=Listing.price\n19    Column         0     6     9     0              0   r[9]=Listing.rent_price\n20    Column         0     7     10    BUY            0   r[10]=Listing.listing_type\n21    Column         0     8     11    GOOD           0   r[11]=Listing.condition\n22    Column         0     9     12                   0   r[12]= cursor 0 column 9\n23    String8        0     13    0     SOLD           0   r[13]='SOLD'\n24    Column         0     11    14                   0   r[14]=Listing.created_at\n25    Once           0     27    0                    0   
+================================================================================

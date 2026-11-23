@@ -1,0 +1,107 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 7: Student Bargain Deals Below Category Average Price
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q7
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title,
+    c.name AS category_name,
+    l.price AS item_price,
+    ROUND((
+        SELECT AVG(l_sub.price) 
+        FROM "Listing" l_sub 
+        WHERE l_sub.category_id = l.category_id 
+          AND l_sub.status = 'ACTIVE'
+    ), 2) AS category_avg_price,
+    ROUND((
+        (SELECT AVG(l_sub.price) FROM "Listing" l_sub WHERE l_sub.category_id = l.category_id AND l_sub.status = 'ACTIVE') - l.price
+    ), 2) AS student_savings,
+    u.name AS seller_name
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+WHERE l.status = 'ACTIVE'
+  AND l.price < (
+      SELECT AVG(l2.price)
+      FROM "Listing" l2
+      WHERE l2.category_id = l.category_id
+        AND l2.status = 'ACTIVE'
+  )
+ORDER BY student_savings DESC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SCAN l
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SCAN l2
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SCAN l_sub
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SCAN l_sub
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0130 ms (averaged over 200 runs)
+Virtual Machine Steps:   861
+Fullscan Table Steps:    117
+Sort Operations:         1
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SCAN l
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SCAN l2
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SCAN l_sub
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SCAN l_sub
+`--USE TEMP B-TREE FOR ORDER BY
+lst_007|Anker 7-in-1 USB-C Hub Adapter|Electronics|1800|2100.0|300.0|Aarav Sharma
+lst_009|Lab Coat & Safety Goggles (Size L)|Academic|300|600.0|300.0|Aarav Sharma
+Memory Used:                         223048 (max 227528) bytes
+Number of Outstanding Allocations:   470 (max 480)
+Number of Pcache Overflow Bytes:     5696 (max 5696) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                125 (max 337)
+Successful lookaside attempts:       786
+Lookaside failures due to size:      13
+Lookaside failures due to OOM:       57
+Pager Heap Usage:                    44544 bytes
+Page cache hits:                     15
+Page cache misses:                   9
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16640 bytes
+Statement Heap/Lookaside Usage:      66640 bytes
+Fullscan Steps:                      117
+Sort Operations:                     1
+Autoindex Inserts:                   0
+Virtual Machine Steps:               861
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        66640
+Run Time: real 0.000202 user 0.000175 sys 0.000027
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     101   0                    0   Start at 101\n1     SorterOpen     6     9     0     k(1,-B)        0   \n2     OpenRead       0     9     0     11             0   root=9 iDb=0; Listing\n3     OpenRead       1     5     0     2              0   root=5 iDb=0; Category\n4     OpenRead       7     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n5     OpenRead       2     2     0     2              0   root=2 iDb=0; User\n6     IfEmpty        2     88    0                    0   if( empty(2) ) goto 88\n7     OpenRead       8     3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n8     Rewind         0     88    0                    0   \n9       Column         0     10    1     ACTIVE         0   r[1]=Listing.status\n10      Ne             2     87    1     BINARY-8       82  if r[1]!=r[2] goto 87\n11      Column         0     5     1     0              0   r[1]=Listing.price\n12      BeginSubrtn    0     4     0                    0   r[4]=NULL\n13        Null           0     5     5                    0   r[5..5]=NULL; Init subquery result\n14        Integer        1     6     0                    0   r[6]=1; LIMIT counter\n15        Null           0     7     8                    0   r[7..8]=NULL\n16        OpenRead       5     9     0     11             0   root=9 iDb=0; Listing\n17        Rewind         5     26    0                    0   \n18          Column         5     2     9                    0   r[9]= cursor 5 column 2\n19          Column         0     2     10                   0   r[10]= cursor 0 column 2\n20          Ne             10    25    9     BINARY-8       81  if r[9]!=r[10] goto 25\n21          Column         5     10    10    ACTIVE         0   r[10]=Listing.status\n22          Ne             2     25    10    BINARY-8       82  if r[10]!=r[2] goto 25\n23          Column         5     5     10    0              0   r[10]=Listing.price\n24          AggStep        0     10    8     avg(1)         1   accum=r[8] step(r[10])\n25        Next           5     18    0                    1   
+================================================================================
