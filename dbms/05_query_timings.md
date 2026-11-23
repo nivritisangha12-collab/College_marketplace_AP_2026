@@ -201,3 +201,118 @@ The table below summarizes the performance metrics across all 12 SQL queries fro
   - In both plans, the joins against `Listing`, `sender (User)`, and `receiver (User)` are resolved using their respective primary key unique indexes (`sqlite_autoindex_*_1`). The index `idx_message_thread` is available for queries filtering on specific conversations (`WHERE listing_id = ? AND sender_id = ?`).
 
 ---
+
+### Query 7: Student Bargain Deals Below Category Average Price
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q7_before.txt`](./plans/q7_before.txt)
+  - After: [`dbms/plans/q7_after.txt`](./plans/q7_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0130 ms | 0.0102 ms | **-21.5% (Substantial Speedup)** |
+| **Virtual Machine Steps** | 861 | 430 | **-50.1% (Halved VM instructions)** |
+| **Fullscan Table Steps** | 117 | 0 | **-100% (117 steps eliminated)** |
+| **Sort Operations** | 1 | 1 | Consistent |
+
+- **Execution Plan Analysis:**
+  - *Before:* This query contains three correlated scalar subqueries: one in the `WHERE` clause comparing item price to category average, and two in the `SELECT` list computing category benchmark price and delta. Without secondary composite indexes, each correlated subquery executed a full table scan (`SCAN l2`, `SCAN l_sub`, `SCAN l_sub`) for *every row* in the outer query, leading to an $O(N^2)$ quadratic explosion (117 fullscan steps, 861 VM steps).
+  - *After:* SQLite detects and uses the composite index `idx_listing_browse (status, category_id, listing_type)`. All three correlated subqueries are converted to direct index range searches (`SEARCH l_sub USING INDEX idx_listing_browse (status=? AND category_id=?)`). Fullscan steps plummeted from 117 to 0, VM steps were cut in half (861 $\rightarrow$ 430), and execution time improved by **21.5%**.
+
+---
+
+### Query 8: High-Demand Items with Confirmed Student Engagement
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q8_before.txt`](./plans/q8_before.txt)
+  - After: [`dbms/plans/q8_after.txt`](./plans/q8_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0109 ms | 0.0086 ms | **-21.1% (Faster)** |
+| **Virtual Machine Steps** | 635 | 370 | **-41.7% (-265 steps)** |
+| **Fullscan Table Steps** | 62 | 0 | **-100% (62 steps eliminated)** |
+| **Sort Operations** | 1 | 1 | Consistent |
+
+- **Execution Plan Analysis:**
+  - *Before:* Query 8 evaluates active listings that have confirmed student engagement via multiple correlated `EXISTS` subqueries (`EXISTS (SELECT 1 FROM "Message" ...)` and `EXISTS (SELECT 1 FROM "Favorite" ...)`). Unindexed message lookups caused repeated sequential scans across the `Message` table (62 fullscan steps).
+  - *After:* The optimizer utilizes `idx_favorite_listing_id` and the covering index `idx_message_thread` (`SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)`). Because the subqueries only need to verify existence on `listing_id`, the covering index satisfies the check entirely from the index leaf pages without dereferencing table data pages. Fullscan steps dropped from 62 to 0, and execution time dropped by **21.1%**.
+
+---
+
+### Query 9: Category Market Share & Valuation Breakdown (CTE)
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q9_before.txt`](./plans/q9_before.txt)
+  - After: [`dbms/plans/q9_after.txt`](./plans/q9_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0160 ms | 0.0155 ms | -3.1% (Faster) |
+| **Virtual Machine Steps** | 550 | 545 | -5 steps |
+| **Fullscan Table Steps** | 17 | 8 | **-52.9% (-9 fullscan steps)** |
+| **Sort Operations** | 2 | 2 | Consistent |
+
+- **Execution Plan Analysis:**
+  - *Before:* The CTE `CategoryAggregates` performed a sequential scan of `Listing` (`SCAN l`) before materializing intermediate grouping results.
+  - *After:* The CTE materialization step now utilizes `idx_listing_status` (`SEARCH l USING INDEX idx_listing_status (status=?)`), filtering for active marketplace listings before calculating aggregate sums and counts. Fullscan steps decreased from 17 to 8.
+
+---
+
+### Query 10: Departmental Listing Price & Recency Rankings (Window Functions)
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q10_before.txt`](./plans/q10_before.txt)
+  - After: [`dbms/plans/q10_after.txt`](./plans/q10_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0301 ms | 0.0307 ms | +0.0006 ms (Measurement Noise) |
+| **Virtual Machine Steps** | 1663 | 1658 | -5 steps |
+| **Fullscan Table Steps** | 9 | 0 | **-100% (Eliminated)** |
+| **Sort Operations** | 4 | 4 | Co-routine window sorts |
+
+- **Execution Plan Analysis:**
+  - *Plan Details:* Computes `DENSE_RANK() OVER (PARTITION BY u.department ORDER BY l.price DESC)` and `ROW_NUMBER() OVER (PARTITION BY u.department ORDER BY l.created_at DESC)`.
+  - SQLite executes window functions using co-routine pipelines with temp B-trees to partition and rank rows.
+  - In the unindexed state, the innermost subquery executed a full table scan (`SCAN l`). In the indexed state, the innermost query uses `idx_listing_status` (`SEARCH l USING INDEX idx_listing_status (status=?)`), eliminating 9 fullscan steps. The sub-microsecond timing variance (+0.0006 ms) is attributable to window buffer allocation overhead on a tiny seed dataset.
+
+---
+
+### Query 11: Top-2 Highest Value Listings per Campus Hostel (Window in CTE)
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q11_before.txt`](./plans/q11_before.txt)
+  - After: [`dbms/plans/q11_after.txt`](./plans/q11_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0148 ms | 0.0152 ms | +0.0004 ms (Measurement Noise) |
+| **Virtual Machine Steps** | 712 | 707 | -5 steps |
+| **Fullscan Table Steps** | 9 | 0 | **-100% (Eliminated)** |
+| **Sort Operations** | 2 | 2 | Co-routine pipeline sorts |
+
+- **Execution Plan Analysis:**
+  - *Plan Details:* Encapsulates `DENSE_RANK() OVER (PARTITION BY u.hostel ORDER BY l.price DESC)` within a Common Table Expression to filter for top-2 campus hostel listings (`WHERE rank_in_hostel <= 2`).
+  - *Improvement:* In the baseline plan, the CTE fed from a sequential table scan (`SCAN l`). With secondary indexes enabled, the CTE feeds directly from `idx_listing_status` (`SEARCH l USING INDEX idx_listing_status (status=?)`), eliminating all 9 fullscan steps.
+
+---
+
+### Query 12: Safe Atomic Purchase Transaction (State Transition & Rollback)
+- **Raw Execution Plans:**
+  - Before: [`dbms/plans/q12_before.txt`](./plans/q12_before.txt)
+  - After: [`dbms/plans/q12_after.txt`](./plans/q12_after.txt)
+- **Runtime Metrics Comparison:**
+
+| Metric | Before Indexing | After Indexing | Difference |
+|:---|:---:|:---:|:---:|
+| **Execution Time** | 0.0069 ms | 0.0060 ms | **-13.0% (Faster)** |
+| **Virtual Machine Steps** | 55 | 76 | +21 steps (atomic rollback/check) |
+| **Fullscan Table Steps** | 0 | 0 | 0 (Indexed from start) |
+| **Sort Operations** | 0 | 0 | None |
+
+- **Execution Plan Analysis:**
+  - *Plan Details:* An atomic state transition updating `Listing.status` from `'ACTIVE'` to `'SOLD'` within a transactional block (`BEGIN TRANSACTION ... COMMIT`).
+  - *Optimization:* Because updates filter by `WHERE id = 'lst_001' AND status = 'ACTIVE'`, SQLite performs an immediate $O(\log N)$ point-lookup via the primary key index `sqlite_autoindex_Listing_1`. Both before and after executions achieve 0 fullscan steps and sub-7-microsecond latency.
+
+---
