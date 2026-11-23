@@ -347,3 +347,18 @@ While secondary indexes dramatically accelerate multi-table joins, category filt
 - **High Selectivity Indexes:** Foreign key indexes (`idx_listing_seller_id`, `idx_favorite_listing_id`, `idx_message_thread`) and numeric range indexes (`idx_listing_price`) possess high cardinality and should be retained permanently.
 - **Low Selectivity Indexes:** Single-column indexes on low-cardinality enum columns (such as `idx_user_role` with only `'STUDENT'` and `'ADMIN'`) provide limited selectivity unless combined in compound indexes or used in partial indexes (e.g., `WHERE status = 'ACTIVE'`).
 
+
+
+---
+
+## 6. Deliverables Verification & Conclusion
+
+### 6.1 CP4 Deliverables Checklist
+- [x] **Raw Plan Logs:** 24 individual plan files saved in [`dbms/plans/`](./plans/) (`q1_before.txt` ... `q12_before.txt`, `q1_after.txt` ... `q12_after.txt`).
+- [x] **Execution Timing Report:** `dbms/05_query_timings.md` documenting engine version, table row counts, summary benchmark table, and query-by-query analysis.
+- [x] **Direct Plan Links:** Verified relative links to `./plans/*.txt` for all 12 queries.
+- [x] **Database Consistency:** Confirmed all 12 SQL queries in `dbms/04_queries.sql` run cleanly against `prisma/dev.db` with zero errors.
+
+### 6.2 Architectural Summary
+By transitioning from sequential table scans to balanced B-tree index searches, the `CollegeXchange` database successfully eliminates $O(N^2)$ quadratic complexity in correlated subqueries (Q7, Q8) and nested-loop joins (Q4, Q5), providing reliable sub-millisecond response times for campus marketplace operations.
+
