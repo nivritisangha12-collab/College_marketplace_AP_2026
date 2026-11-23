@@ -1,0 +1,89 @@
+================================================================================
+EXPLAIN PLAN (AFTER INDEXING) - QUERY 1: Active Marketplace Feed & Item Discovery
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    AFTER applying CP4 secondary indexes (Optimized Execution Plan)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q1
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category_name,
+    u.name AS seller_name,
+    u.department AS seller_department,
+    u.hostel AS pickup_hostel,
+    l.price AS selling_price,
+    l.condition AS item_condition,
+    l.created_at AS posted_at
+FROM "Listing" l
+INNER JOIN "User" u ON l.seller_id = u.id
+INNER JOIN "Category" c ON l.category_id = c.id
+WHERE l.status = 'ACTIVE'
+  AND l.price <= 1000.00
+  AND c.slug IN ('academic', 'books')
+ORDER BY l.price ASC, l.created_at DESC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_price (price<?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+`--USE TEMP B-TREE FOR LAST TERM OF ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Index Search / Covering Index Lookup
+Execution Time:          0.0092 ms (averaged over 200 runs)
+Virtual Machine Steps:   224
+Fullscan Table Steps:    0
+Sort Operations:         4
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_price (price<?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+`--USE TEMP B-TREE FOR LAST TERM OF ORDER BY
+lst_009|Lab Coat & Safety Goggles (Size L)|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|300|GOOD|2026-10-10 14:05:00
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|Ananya Sen|Mechanical Engineering|Day Scholar|450|GOOD|2026-10-06 18:20:00
+lst_003|Complete Engineering Drawing Kit|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|650|GOOD|2026-10-03 09:15:00
+lst_001|Casio fx-991CW Scientific Calculator|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|850|LIKE_NEW|2026-10-01 10:00:00
+Memory Used:                         228096 (max 250480) bytes
+Number of Outstanding Allocations:   482 (max 497)
+Number of Pcache Overflow Bytes:     5760 (max 15104) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                143 (max 294)
+Successful lookaside attempts:       600
+Lookaside failures due to size:      14
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    48896 bytes
+Page cache hits:                     3
+Page cache misses:                   10
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   20536 bytes
+Statement Heap/Lookaside Usage:      48176 bytes
+Fullscan Steps:                      0
+Sort Operations:                     4
+Autoindex Inserts:                   0
+Virtual Machine Steps:               224
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        48176
+Run Time: real 0.000200 user 0.000171 sys 0.000031
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     69    0                    0   Start at 69\n1     OpenEphemeral  3     10    0     k(1,-B)        0   nColumn=10\n2     Integer        10    1     0                    0   r[1]=10; LIMIT counter\n3     OpenRead       0     9     0     12             0   root=9 iDb=0; Listing\n4     OpenRead       4     27    0     k(2,,)         0   root=27 iDb=0; idx_listing_price\n5     OpenRead       1     2     0     7              0   root=2 iDb=0; User\n6     OpenRead       5     3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n7     OpenRead       2     5     0     3              0   root=5 iDb=0; Category\n8     IfEmpty        2     53    0                    0   if( empty(2) ) goto 53\n9     OpenRead       6     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n10    Rewind         4     53    2     0              0   \n11    Real           0     2     0     1000           0   r[2]=1000\n12      IdxGT          4     53    2     1              0   key=r[2]\n13      DeferredSeek   4     0     0                    0   Move 0 to 4.rowid if needed\n14      Column         0     10    3     ACTIVE         0   r[3]=Listing.status\n15      Ne             4     52    3     BINARY-8       82  if r[3]!=r[4] goto 52\n16      Column         0     1     5                    0   r[5]= cursor 0 column 1\n17      SeekGE         5     52    5     1              0   key=r[5]\n18      IdxGT          5     52    5     1              0   key=r[5]\n19      DeferredSeek   5     0     1                    0   Move 1 to 5.rowid if needed\n20      Column         0     2     6                    0   r[6]= cursor 0 column 2\n21      SeekGE         6     52    6     1              0   key=r[6]\n22      IdxGT          6     52    6     1              0   key=r[6]\n23      DeferredSeek   6     0     2                    0   Move 2 to 6.rowid if needed\n24      Noop           0     0     0                    0   begin IN expr\n25      Column         2     2     3                    0   r[3]= cursor 2 column 2
+================================================================================

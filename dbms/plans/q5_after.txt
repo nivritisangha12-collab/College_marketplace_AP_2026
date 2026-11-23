@@ -1,0 +1,91 @@
+================================================================================
+EXPLAIN PLAN (AFTER INDEXING) - QUERY 5: Campus Wishlist Leaderboard (Most Favorited Items)
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    AFTER applying CP4 secondary indexes (Optimized Execution Plan)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q5
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category_name,
+    l.price,
+    u.name AS seller_name,
+    u.hostel AS pickup_location,
+    COUNT(f.id) AS total_saves
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+LEFT JOIN "Favorite" f ON l.id = f.listing_id
+WHERE l.status = 'ACTIVE'
+GROUP BY l.id, l.title, c.name, l.price, u.name, u.hostel
+HAVING COUNT(f.id) > 0
+ORDER BY total_saves DESC, l.price ASC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_status (status=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH f USING INDEX idx_favorite_listing_id (listing_id=?) LEFT-JOIN
+|--USE TEMP B-TREE FOR GROUP BY
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Index Search / Covering Index Lookup
+Execution Time:          0.0120 ms (averaged over 200 runs)
+Virtual Machine Steps:   622
+Fullscan Table Steps:    0
+Sort Operations:         2
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_status (status=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH f USING INDEX idx_favorite_listing_id (listing_id=?) LEFT-JOIN
+|--USE TEMP B-TREE FOR GROUP BY
+`--USE TEMP B-TREE FOR ORDER BY
+lst_001|Casio fx-991CW Scientific Calculator|Academic|850|Aarav Sharma|Hostel B|2
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|450|Ananya Sen|Day Scholar|1
+lst_004|Sony WH-CH520 Wireless Headphones|Electronics|2400|Ananya Sen|Day Scholar|1
+lst_002|Decathlon Riverside 120 Hybrid Cycle|Sports|4200|Riya Patel|Hostel A|1
+Memory Used:                         239424 (max 248576) bytes
+Number of Outstanding Allocations:   486 (max 492)
+Number of Pcache Overflow Bytes:     5888 (max 5888) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                137 (max 303)
+Successful lookaside attempts:       738
+Lookaside failures due to size:      12
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    57600 bytes
+Page cache hits:                     3
+Page cache misses:                   12
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   20552 bytes
+Statement Heap/Lookaside Usage:      54128 bytes
+Fullscan Steps:                      0
+Sort Operations:                     2
+Autoindex Inserts:                   0
+Virtual Machine Steps:               622
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        54128
+Run Time: real 0.000205 user 0.000177 sys 0.000028
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     105   0                    0   Start at 105\n1     SorterOpen     4     10    0     k(2,-B,B)      0   \n2     SorterOpen     5     7     0     k(6,B,B,B,B,B,B) 0   \n3     Integer        0     2     0                    0   r[2]=0; clear abort flag\n4     Null           0     5     10                   0   r[5..10]=NULL\n5     Gosub          4     89    0                    0   \n6     OpenRead       0     9     0     11             0   root=9 iDb=0; Listing\n7     OpenRead       6     26    0     k(2,,)         2   root=26 iDb=0; idx_listing_status\n8     OpenRead       2     2     0     7              0   root=2 iDb=0; User\n9     OpenRead       7     3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n10    OpenRead       1     5     0     2              0   root=5 iDb=0; Category\n11    IfEmpty        1     48    0                    0   if( empty(1) ) goto 48\n12    OpenRead       8     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n13    OpenRead       3     13    0     3              0   root=13 iDb=0; Favorite\n14    OpenRead       9     32    0     k(2,,)         2   root=32 iDb=0; idx_favorite_listing_id\n15    String8        0     17    0     ACTIVE         0   r[17]='ACTIVE'\n16    SeekGE         6     48    17    1              0   key=r[17]\n17      IdxGT          6     48    17    1              0   key=r[17]\n18      DeferredSeek   6     0     0                    0   Move 0 to 6.rowid if needed\n19      Column         0     1     18                   0   r[18]= cursor 0 column 1\n20      SeekGE         7     47    18    1              0   key=r[18]\n21      IdxGT          7     47    18    1              0   key=r[18]\n22      DeferredSeek   7     0     2                    0   Move 2 to 7.rowid if needed\n23      Column         0     2     19                   0   r[19]= cursor 0 column 2\n24      SeekGE         8     47    19    1              0   key=r[19]\n25      IdxGT          8     47    19    1              0   key=r[19]
+================================================================================
