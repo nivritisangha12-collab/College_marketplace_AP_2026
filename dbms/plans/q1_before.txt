@@ -1,0 +1,89 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 1: Active Marketplace Feed & Item Discovery
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q1
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category_name,
+    u.name AS seller_name,
+    u.department AS seller_department,
+    u.hostel AS pickup_hostel,
+    l.price AS selling_price,
+    l.condition AS item_condition,
+    l.created_at AS posted_at
+FROM "Listing" l
+INNER JOIN "User" u ON l.seller_id = u.id
+INNER JOIN "Category" c ON l.category_id = c.id
+WHERE l.status = 'ACTIVE'
+  AND l.price <= 1000.00
+  AND c.slug IN ('academic', 'books')
+ORDER BY l.price ASC, l.created_at DESC
+LIMIT 10;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SCAN l
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0097 ms (averaged over 200 runs)
+Virtual Machine Steps:   207
+Fullscan Table Steps:    9
+Sort Operations:         1
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SCAN l
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+`--USE TEMP B-TREE FOR ORDER BY
+lst_009|Lab Coat & Safety Goggles (Size L)|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|300|GOOD|2026-10-10 14:05:00
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|Ananya Sen|Mechanical Engineering|Day Scholar|450|GOOD|2026-10-06 18:20:00
+lst_003|Complete Engineering Drawing Kit|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|650|GOOD|2026-10-03 09:15:00
+lst_001|Casio fx-991CW Scientific Calculator|Academic|Aarav Sharma|Computer Science & Engineering|Hostel B|850|LIKE_NEW|2026-10-01 10:00:00
+Memory Used:                         217640 (max 240024) bytes
+Number of Outstanding Allocations:   444 (max 459)
+Number of Pcache Overflow Bytes:     5696 (max 15040) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                140 (max 284)
+Successful lookaside attempts:       584
+Lookaside failures due to size:      12
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    44544 bytes
+Page cache hits:                     3
+Page cache misses:                   9
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16640 bytes
+Statement Heap/Lookaside Usage:      38496 bytes
+Fullscan Steps:                      9
+Sort Operations:                     1
+Autoindex Inserts:                   0
+Virtual Machine Steps:               207
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        38496
+Run Time: real 0.000283 user 0.000151 sys 0.000134
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     56    0                    0   Start at 56\n1     OpenEphemeral  3     12    0     k(2,B,-B)      0   nColumn=12\n2     Integer        10    1     0                    0   r[1]=10; LIMIT counter\n3     OpenRead       0     9     0     12             0   root=9 iDb=0; Listing\n4     OpenRead       1     2     0     7              0   root=2 iDb=0; User\n5     OpenRead       4     3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n6     OpenRead       2     5     0     3              0   root=5 iDb=0; Category\n7     IfEmpty        2     43    0                    0   if( empty(2) ) goto 43\n8     OpenRead       5     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n9     Rewind         0     43    0                    0   \n10      Column         0     10    2     ACTIVE         0   r[2]=Listing.status\n11      Ne             3     42    2     BINARY-8       82  if r[2]!=r[3] goto 42\n12      Column         0     5     2     0              0   r[2]=Listing.price\n13      Gt             4     42    2     BINARY-8       83  if r[2]>r[4] goto 42\n14      Column         0     1     5                    0   r[5]= cursor 0 column 1\n15      SeekGE         4     42    5     1              0   key=r[5]\n16      IdxGT          4     42    5     1              0   key=r[5]\n17      DeferredSeek   4     0     1                    0   Move 1 to 4.rowid if needed\n18      Column         0     2     6                    0   r[6]= cursor 0 column 2\n19      SeekGE         5     42    6     1              0   key=r[6]\n20      IdxGT          5     42    6     1              0   key=r[6]\n21      DeferredSeek   5     0     2                    0   Move 2 to 5.rowid if needed\n22      Noop           0     0     0                    0   begin IN expr\n23      Column         2     2     2                    0   r[2]= cursor 2 column 2\n24      Eq             2     26    7     BINARY-8       66  if r[7]==r[2] goto 26\n25      Ne             2     42    8     BINARY-8       82  if r[8]!=r[2] goto 42; end IN expr
+================================================================================

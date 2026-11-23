@@ -1,0 +1,86 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 3: Category Inventory & Price Range Analytics
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q3
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    c.id AS category_id,
+    c.name AS category_name,
+    COUNT(l.id) AS total_active_listings,
+    MIN(l.price) AS min_price,
+    ROUND(AVG(l.price), 2) AS avg_price,
+    MAX(l.price) AS max_price,
+    ROUND(SUM(l.price), 2) AS total_category_valuation
+FROM "Category" c
+INNER JOIN "Listing" l ON c.id = l.category_id
+WHERE l.status = 'ACTIVE'
+GROUP BY c.id, c.name
+HAVING COUNT(l.id) >= 1
+ORDER BY total_active_listings DESC, avg_price DESC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SCAN l
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--USE TEMP B-TREE FOR GROUP BY
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0127 ms (averaged over 200 runs)
+Virtual Machine Steps:   494
+Fullscan Table Steps:    9
+Sort Operations:         2
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SCAN l
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--USE TEMP B-TREE FOR GROUP BY
+`--USE TEMP B-TREE FOR ORDER BY
+cat_001|Academic|3|300|600.0|850|1800.0
+cat_003|Electronics|2|1800|2100.0|2400|4200.0
+cat_006|Sports|1|4200|4200.0|4200|4200.0
+cat_004|Hostel|1|1200|1200.0|1200|1200.0
+cat_002|Books|1|450|450.0|450|450.0
+Memory Used:                         211944 (max 220760) bytes
+Number of Outstanding Allocations:   440 (max 446)
+Number of Pcache Overflow Bytes:     5568 (max 5568) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                118 (max 253)
+Successful lookaside attempts:       595
+Lookaside failures due to size:      10
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    35840 bytes
+Page cache hits:                     3
+Page cache misses:                   7
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16624 bytes
+Statement Heap/Lookaside Usage:      21600 bytes
+Fullscan Steps:                      9
+Sort Operations:                     2
+Autoindex Inserts:                   0
+Virtual Machine Steps:               494
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        21600
+Run Time: real 0.000320 user 0.000176 sys 0.000144
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     90    0                    0   Start at 90\n1     SorterOpen     2     10    0     k(2,-B,-B)     0   \n2     SorterOpen     3     4     0     k(2,-B,-B)     0   \n3     Integer        0     2     0                    0   r[2]=0; clear abort flag\n4     Null           0     5     6                    0   r[5..6]=NULL\n5     Gosub          4     74    0                    0   \n6     OpenRead       1     9     0     11             0   root=9 iDb=0; Listing\n7     OpenRead       0     5     0     2              0   root=5 iDb=0; Category\n8     OpenRead       4     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n9     Rewind         1     23    0                    0   \n10      Column         1     10    9     ACTIVE         0   r[9]=Listing.status\n11      Ne             10    22    9     BINARY-8       82  if r[9]!=r[10] goto 22\n12      Column         1     2     11                   0   r[11]= cursor 1 column 2\n13      SeekGE         4     22    11    1              0   key=r[11]\n14      IdxGT          4     22    11    1              0   key=r[11]\n15      DeferredSeek   4     0     0                    0   Move 0 to 4.rowid if needed\n16      Column         4     0     21                   0   r[21]= cursor 4 column 0\n17      Column         0     1     22                   0   r[22]= cursor 0 column 1\n18      Column         1     0     23                   0   r[23]= cursor 1 column 0\n19      Column         1     5     24    0              0   r[24]=Listing.price\n20      MakeRecord     21    4     9                    0   r[9]=mkrec(r[21..24])\n21      SorterInsert   3     9     0                    0   key=r[9]\n22    Next           1     10    0                    1   \n23    OpenPseudo     5     9     4                    0   4 columns in r[9]\n24    SorterSort     3     77    0                    0   GROUP BY sort\n25      SorterData     3     9     5                    0   r[9]=data
+================================================================================

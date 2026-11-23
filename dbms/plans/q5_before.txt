@@ -1,0 +1,89 @@
+================================================================================
+EXPLAIN PLAN (BEFORE INDEXING) - QUERY 5: Campus Wishlist Leaderboard (Most Favorited Items)
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    BEFORE applying CP4 secondary indexes (Baseline / Unindexed)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q5
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title AS item_title,
+    c.name AS category_name,
+    l.price,
+    u.name AS seller_name,
+    u.hostel AS pickup_location,
+    COUNT(f.id) AS total_saves
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+LEFT JOIN "Favorite" f ON l.id = f.listing_id
+WHERE l.status = 'ACTIVE'
+GROUP BY l.id, l.title, c.name, l.price, u.name, u.hostel
+HAVING COUNT(f.id) > 0
+ORDER BY total_saves DESC, l.price ASC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SCAN l USING INDEX sqlite_autoindex_Listing_1
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SCAN f LEFT-JOIN
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Baseline Table Scan (No secondary indexes)
+Execution Time:          0.0217 ms (averaged over 200 runs)
+Virtual Machine Steps:   661
+Fullscan Table Steps:    41
+Sort Operations:         1
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SCAN l USING INDEX sqlite_autoindex_Listing_1
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--SCAN f LEFT-JOIN
+`--USE TEMP B-TREE FOR ORDER BY
+lst_001|Casio fx-991CW Scientific Calculator|Academic|850|Aarav Sharma|Hostel B|2
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|450|Ananya Sen|Day Scholar|1
+lst_004|Sony WH-CH520 Wireless Headphones|Electronics|2400|Ananya Sen|Day Scholar|1
+lst_002|Decathlon Riverside 120 Hybrid Cycle|Sports|4200|Riya Patel|Hostel A|1
+Memory Used:                         229480 (max 234024) bytes
+Number of Outstanding Allocations:   450 (max 454)
+Number of Pcache Overflow Bytes:     5824 (max 5824) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                132 (max 293)
+Successful lookaside attempts:       708
+Lookaside failures due to size:      14
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    53248 bytes
+Page cache hits:                     3
+Page cache misses:                   11
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   16656 bytes
+Statement Heap/Lookaside Usage:      47792 bytes
+Fullscan Steps:                      41
+Sort Operations:                     1
+Autoindex Inserts:                   0
+Virtual Machine Steps:               661
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        47792
+Run Time: real 0.000190 user 0.000163 sys 0.000027
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     90    0                    0   Start at 90\n1     SorterOpen     4     10    0     k(2,-B,B)      0   \n2     Noop           5     7     0                    0   \n3     Integer        0     2     0                    0   r[2]=0; clear abort flag\n4     Null           0     5     10                   0   r[5..10]=NULL\n5     Gosub          4     74    0                    0   \n6     OpenRead       0     9     0     11             0   root=9 iDb=0; Listing\n7     OpenRead       6     10    0     k(1,)          0   root=10 iDb=0; sqlite_autoindex_Listing_1\n8     OpenRead       1     5     0     2              0   root=5 iDb=0; Category\n9     OpenRead       7     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n10    OpenRead       2     2     0     7              0   root=2 iDb=0; User\n11    IfEmpty        2     59    0                    0   if( empty(2) ) goto 59\n12    OpenRead       8     3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n13    OpenRead       3     13    0     3              0   root=13 iDb=0; Favorite\n14    Rewind         6     59    17    0              0   \n15      DeferredSeek   6     0     0                    0   Move 0 to 6.rowid if needed\n16      Column         0     10    17    ACTIVE         0   r[17]=Listing.status\n17      Ne             18    58    17    BINARY-8       82  if r[17]!=r[18] goto 58\n18      Column         0     2     19                   0   r[19]= cursor 0 column 2\n19      SeekGE         7     58    19    1              0   key=r[19]\n20      IdxGT          7     58    19    1              0   key=r[19]\n21      DeferredSeek   7     0     1                    0   Move 1 to 7.rowid if needed\n22      Column         0     1     20                   0   r[20]= cursor 0 column 1\n23      SeekGE         8     58    20    1              0   key=r[20]\n24      IdxGT          8     58    20    1              0   key=r[20]\n25      DeferredSeek   8     0     2                    0   Move 2 to 8.rowid if needed
+================================================================================
