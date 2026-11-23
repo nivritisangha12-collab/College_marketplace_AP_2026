@@ -326,3 +326,24 @@ The table below summarizes the performance metrics across all 12 SQL queries fro
   $$\text{Improvement (\%)} = \left( \frac{T_{\text{before}} - T_{\text{after}}}{T_{\text{before}}} \right) \times 100\%$$
 - **Measurement Stability:** Runtimes reflect monotonic hardware clock time averaged over 200 benchmark iterations. On sub-microsecond queries (Q10, Q11), variations within $\pm 0.0006\text{ ms}$ reflect OS measurement noise while the VM bytecode step reduction validates planner efficiency.
 
+
+
+---
+
+## 5. Index Strategy & Write-Overhead Tradeoffs
+
+While secondary indexes dramatically accelerate multi-table joins, category filtering, and subquery resolution, they introduce structural trade-offs in relational database management:
+
+### 5.1 Storage Footprint & Memory Overhead
+- In SQLite B-trees, each secondary index creates a distinct B-tree structure stored in the database file pages.
+- For `CollegeXchange`, the 17 secondary indexes occupy approximately 32 KB of initial index leaf and interior pages. As listings and chat messages grow to thousands of records, index memory overhead remains linear ($O(K \cdot N)$) and comfortably fits in SQLite's default cache page budget (2,000 pages / $\approx 8\text{ MB}$).
+
+### 5.2 Write Amplification on DML Operations (`INSERT`, `UPDATE`, `DELETE`)
+- **Insert Overhead:** When a student creates a new listing (`INSERT INTO "Listing"`), SQLite must write the data row to the `Listing` table B-tree and update 6 secondary indexes (`idx_listing_seller_id`, `idx_listing_category_id`, `idx_listing_status`, `idx_listing_price`, `idx_listing_created_at`, `idx_listing_browse`). Each index insert requires traversing from the root page to the appropriate leaf page and performing possible page splits ($O(\log N)$ per index).
+- **Update Overhead:** Updates that do not alter indexed columns (e.g., modifying `Listing.description`) execute with zero index maintenance. Updates to `Listing.status` (such as marking an item as `'SOLD'`) touch only `idx_listing_status` and `idx_listing_browse`.
+- **Delete Overhead:** Deleting a user or listing triggers cascade actions and corresponding index node removals across `ListingImage`, `Favorite`, and `Message` tables.
+
+### 5.3 Selectivity & Index Pruning Recommendations
+- **High Selectivity Indexes:** Foreign key indexes (`idx_listing_seller_id`, `idx_favorite_listing_id`, `idx_message_thread`) and numeric range indexes (`idx_listing_price`) possess high cardinality and should be retained permanently.
+- **Low Selectivity Indexes:** Single-column indexes on low-cardinality enum columns (such as `idx_user_role` with only `'STUDENT'` and `'ADMIN'`) provide limited selectivity unless combined in compound indexes or used in partial indexes (e.g., `WHERE status = 'ACTIVE'`).
+
