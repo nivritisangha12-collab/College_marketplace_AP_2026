@@ -1,0 +1,108 @@
+================================================================================
+EXPLAIN PLAN (AFTER INDEXING) - QUERY 9: Category Market Share & Valuation Breakdown (Common Table Expression - CTE)
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    AFTER applying CP4 secondary indexes (Optimized Execution Plan)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q9
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+WITH CategoryAggregates AS (
+    SELECT 
+        c.id AS category_id,
+        c.name AS category_name,
+        COUNT(l.id) AS active_count,
+        SUM(l.price) AS category_value
+    FROM "Category" c
+    INNER JOIN "Listing" l ON c.id = l.category_id
+    WHERE l.status = 'ACTIVE'
+    GROUP BY c.id, c.name
+),
+MarketTotals AS (
+    SELECT 
+        SUM(active_count) AS total_listings,
+        SUM(category_value) AS total_market_value
+    FROM CategoryAggregates
+)
+SELECT 
+    ca.category_name,
+    ca.active_count,
+    ROUND((ca.active_count * 100.0) / mt.total_listings, 2) AS inventory_share_pct,
+    ROUND(ca.category_value, 2) AS category_valuation,
+    ROUND((ca.category_value * 100.0) / mt.total_market_value, 2) AS value_share_pct
+FROM CategoryAggregates ca
+CROSS JOIN MarketTotals mt
+ORDER BY ca.category_value DESC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--MATERIALIZE CategoryAggregates
+|  |--SEARCH l USING INDEX idx_listing_status (status=?)
+|  |--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|  `--USE TEMP B-TREE FOR GROUP BY
+|--MATERIALIZE MarketTotals
+|  `--SCAN CategoryAggregates
+|--SCAN ca
+|--SCAN mt
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Index Search / Covering Index Lookup
+Execution Time:          0.0155 ms (averaged over 200 runs)
+Virtual Machine Steps:   545
+Fullscan Table Steps:    8
+Sort Operations:         2
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--MATERIALIZE CategoryAggregates
+|  |--SEARCH l USING INDEX idx_listing_status (status=?)
+|  |--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|  `--USE TEMP B-TREE FOR GROUP BY
+|--MATERIALIZE MarketTotals
+|  `--SCAN CategoryAggregates
+|--SCAN ca
+|--SCAN mt
+`--USE TEMP B-TREE FOR ORDER BY
+Electronics|2|25.0|4200.0|35.44
+Sports|1|12.5|4200.0|35.44
+Academic|3|37.5|1800.0|15.19
+Hostel|1|12.5|1200.0|10.13
+Books|1|12.5|450.0|3.8
+Memory Used:                         227104 (max 271136) bytes
+Number of Outstanding Allocations:   501 (max 529)
+Number of Pcache Overflow Bytes:     5632 (max 24192) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                95 (max 337)
+Successful lookaside attempts:       864
+Lookaside failures due to size:      12
+Lookaside failures due to OOM:       57
+Pager Heap Usage:                    40192 bytes
+Page cache hits:                     3
+Page cache misses:                   8
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   20520 bytes
+Statement Heap/Lookaside Usage:      39248 bytes
+Fullscan Steps:                      8
+Sort Operations:                     2
+Autoindex Inserts:                   0
+Virtual Machine Steps:               545
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        39248
+Run Time: real 0.000240 user 0.000207 sys 0.000034
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     124   0                    0   Start at 124\n1     Goto           0     67    0                    0   \n2       Once           0     66    0                    0   materialize CategoryAggregates\n3       OpenEphemeral  0     4     0                    0   nColumn=4\n4       SorterOpen     7     4     0     k(2,B,B)       0   \n5       Integer        0     3     0                    0   r[3]=0; clear abort flag\n6       Null           0     6     7                    0   r[6..7]=NULL\n7       Gosub          5     63    0                    0   \n8       OpenRead       3     9     0     11             0   root=9 iDb=0; Listing\n9       OpenRead       8     26    0     k(2,,)         2   root=26 iDb=0; idx_listing_status\n10      OpenRead       2     5     0     2              0   root=5 iDb=0; Category\n11      OpenRead       9     6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n12      String8        0     10    0     ACTIVE         0   r[10]='ACTIVE'\n13      SeekGE         8     27    10    1              0   key=r[10]\n14        IdxGT          8     27    10    1              0   key=r[10]\n15        DeferredSeek   8     0     3                    0   Move 3 to 8.rowid if needed\n16        Column         3     2     11                   0   r[11]= cursor 3 column 2\n17        SeekGE         9     26    11    1              0   key=r[11]\n18        IdxGT          9     26    11    1              0   key=r[11]\n19        DeferredSeek   9     0     2                    0   Move 2 to 9.rowid if needed\n20        Column         9     0     18                   0   r[18]= cursor 9 column 0\n21        Column         2     1     19                   0   r[19]= cursor 2 column 1\n22        Column         3     0     20                   0   r[20]= cursor 3 column 0\n23        Column         3     5     21    0              0   r[21]=Listing.price\n24        MakeRecord     18    4     22                   0   r[22]=mkrec(r[18..21])\n25        SorterInsert   7     22    0                    0   key=r[22]
+================================================================================

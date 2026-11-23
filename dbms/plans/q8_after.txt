@@ -1,0 +1,115 @@
+================================================================================
+EXPLAIN PLAN (AFTER INDEXING) - QUERY 8: High-Demand Items with Confirmed Student Engagement
+================================================================================
+Project:      CollegeXchange (College Marketplace AP 2026)
+Database:     SQLite 3.54.0 (prisma/dev.db)
+Execution:    AFTER applying CP4 secondary indexes (Optimized Execution Plan)
+Timestamp:    2026-11-23 18:35:27 +0530
+Query Number: Q8
+--------------------------------------------------------------------------------
+EXACT SQL QUERY:
+--------------------------------------------------------------------------------
+SELECT 
+    l.id AS listing_id,
+    l.title,
+    c.name AS category,
+    l.price,
+    u.name AS seller_name,
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id) 
+         AND EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'High Demand (Wishlisted & Inquired)'
+        WHEN EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id) 
+        THEN 'Inquired by Buyer'
+        ELSE 'Bookmarked in Wishlist'
+    END AS engagement_level
+FROM "Listing" l
+INNER JOIN "Category" c ON l.category_id = c.id
+INNER JOIN "User" u ON l.seller_id = u.id
+WHERE l.status = 'ACTIVE'
+  AND (
+      EXISTS (SELECT 1 FROM "Favorite" f WHERE f.listing_id = l.id)
+      OR
+      EXISTS (SELECT 1 FROM "Message" m WHERE m.listing_id = l.id)
+  )
+ORDER BY l.price DESC;
+
+--------------------------------------------------------------------------------
+QUERY PLAN TREE (EXPLAIN QUERY PLAN):
+--------------------------------------------------------------------------------
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_status (status=?)
+|--CORRELATED SCALAR SUBQUERY 4
+|  `--SEARCH f USING COVERING INDEX idx_favorite_listing_id (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 5
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SEARCH f USING COVERING INDEX idx_favorite_listing_id (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+`--USE TEMP B-TREE FOR ORDER BY
+
+--------------------------------------------------------------------------------
+EXECUTION PROFILING & RUNTIME METRICS:
+--------------------------------------------------------------------------------
+Execution Mode:          Index Search / Covering Index Lookup
+Execution Time:          0.0086 ms (averaged over 200 runs)
+Virtual Machine Steps:   370
+Fullscan Table Steps:    0
+Sort Operations:         1
+
+CLI STATS & RESOURCE USAGE:
+QUERY PLAN
+|--SEARCH l USING INDEX idx_listing_status (status=?)
+|--CORRELATED SCALAR SUBQUERY 4
+|  `--SEARCH f USING COVERING INDEX idx_favorite_listing_id (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 5
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+|--SEARCH c USING INDEX sqlite_autoindex_Category_1 (id=?)
+|--SEARCH u USING INDEX sqlite_autoindex_User_1 (id=?)
+|--CORRELATED SCALAR SUBQUERY 1
+|  `--SEARCH f USING COVERING INDEX idx_favorite_listing_id (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 2
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+|--CORRELATED SCALAR SUBQUERY 3
+|  `--SEARCH m USING COVERING INDEX idx_message_thread (listing_id=?)
+`--USE TEMP B-TREE FOR ORDER BY
+lst_002|Decathlon Riverside 120 Hybrid Cycle|Sports|4200|Riya Patel|High Demand (Wishlisted & Inquired)
+lst_004|Sony WH-CH520 Wireless Headphones|Electronics|2400|Ananya Sen|High Demand (Wishlisted & Inquired)
+lst_001|Casio fx-991CW Scientific Calculator|Academic|850|Aarav Sharma|High Demand (Wishlisted & Inquired)
+lst_006|Higher Engineering Mathematics by B.S. Grewal (44th Ed)|Books|450|Ananya Sen|High Demand (Wishlisted & Inquired)
+Memory Used:                         238928 (max 243408) bytes
+Number of Outstanding Allocations:   487 (max 491)
+Number of Pcache Overflow Bytes:     5888 (max 5888) bytes
+Largest Allocation:                  122400 bytes
+Largest Pcache Allocation:           4104 bytes
+Lookaside Slots Used:                137 (max 327)
+Successful lookaside attempts:       760
+Lookaside failures due to size:      12
+Lookaside failures due to OOM:       0
+Pager Heap Usage:                    57600 bytes
+Page cache hits:                     21
+Page cache misses:                   12
+Page cache writes:                   0
+Page cache spills:                   0
+Temporary data spilled to disk:      0
+Schema Heap Usage:                   20568 bytes
+Statement Heap/Lookaside Usage:      68240 bytes
+Fullscan Steps:                      0
+Sort Operations:                     1
+Autoindex Inserts:                   0
+Virtual Machine Steps:               370
+Reprepare operations:                1
+Number of times run:                 1
+Memory used by prepared stmt:        68240
+Run Time: real 0.000192 user 0.000165 sys 0.000027
+
+--------------------------------------------------------------------------------
+VDBE BYTECODE INSTRUCTIONS (FIRST 25 OPCODES):
+--------------------------------------------------------------------------------
+addr  opcode         p1    p2    p3    p4             p5  comment      \n----  -------------  ----  ----  ----  -------------  --  -------------\n0     Init           0     106   0                    0   Start at 106\n1     SorterOpen     8     8     0     k(1,-B)        0   \n2     OpenRead       0     9     0     11             0   root=9 iDb=0; Listing\n3     OpenRead       9     26    0     k(2,,)         2   root=26 iDb=0; idx_listing_status\n4     OpenRead       1     5     0     2              0   root=5 iDb=0; Category\n5     OpenRead       10    6     0     k(1,)          2   root=6 iDb=0; sqlite_autoindex_Category_1\n6     OpenRead       2     2     0     2              0   root=2 iDb=0; User\n7     IfEmpty        2     94    0                    0   if( empty(2) ) goto 94\n8     OpenRead       11    3     0     k(1,)          2   root=3 iDb=0; sqlite_autoindex_User_1\n9     String8        0     1     0     ACTIVE         0   r[1]='ACTIVE'\n10    SeekGE         9     94    1     1              0   key=r[1]\n11      IdxGT          9     94    1     1              0   key=r[1]\n12      DeferredSeek   9     0     0                    0   Move 0 to 9.rowid if needed\n13      BeginSubrtn    0     3     0                    0   r[3]=NULL\n14        Integer        0     4     0                    0   r[4]=0; Init EXISTS result\n15        Integer        1     5     0                    0   r[5]=1; LIMIT counter\n16        OpenRead       12    32    0     k(2,,)         2   root=32 iDb=0; idx_favorite_listing_id\n17        Column         0     0     6                    0   r[6]= cursor 0 column 0\n18        SeekGE         12    23    6     1              0   key=r[6]\n19          IdxGT          12    23    6     1              0   key=r[6]\n20          Integer        1     4     0                    0   r[4]=1\n21          DecrJumpZero   5     23    0                    0   if (--r[5])==0 goto 23\n22        Next           12    19    1                    0   \n23      Return         3     14    1                    0   \n24      If             4     37    0                    0   \n25      BeginSubrtn    0     8     0                    0   r[8]=NULL
+================================================================================
