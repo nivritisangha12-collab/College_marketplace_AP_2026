@@ -18,7 +18,12 @@ const messageRoutes = require('./routes/messageRoutes');
 const app = express();
 
 // 1. Third-party & Global Middleware
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-demo-user-id']
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // 2. Custom AP Logger Middleware
@@ -56,14 +61,16 @@ app.use((req, res, next) => {
 // 7. Global Error Middleware
 app.use(errorMiddleware);
 
-// Start Express HTTP Server
-app.listen(PORT, () => {
-  console.log(`==================================================`);
-  console.log(` CollegeXchange Express Backend Server is running `);
-  console.log(` Server URL : http://localhost:${PORT}`);
-  console.log(` Health Check : http://localhost:${PORT}/api/health`);
-  console.log(` Uploads Path : ${paths.uploads}`);
-  console.log(`==================================================`);
-});
+// Start Express HTTP Server when executed directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`==================================================`);
+    console.log(` CollegeXchange Express Backend Server is running `);
+    console.log(` Server URL : http://localhost:${PORT}`);
+    console.log(` Health Check : http://localhost:${PORT}/api/health`);
+    console.log(` Uploads Path : ${paths.uploads}`);
+    console.log(`==================================================`);
+  });
+}
 
 module.exports = app;

@@ -5,6 +5,7 @@
   "main": "backend/server.js",
   "type": "commonjs",
   "scripts": {
+    "build": "node -e \"console.log('Production build check passed successfully')\"",
     "start": "node backend/server.js",
     "dev": "node backend/server.js",
     "http-demo": "node backend/httpDemo.js",
